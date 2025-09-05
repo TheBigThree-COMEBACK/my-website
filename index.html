@@ -1013,7 +1013,7 @@
 <body>
   <!-- Video Background (Silent initially) -->
   <div class="video-background">
-    <video id="background-video" loop muted style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+    <video id="background-video" autoplay loop muted style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
       <source src="https://archive.org/download/judas-shinjuku-showdown-arc-full-fight-animation-amv/JUDAS%20%EF%BD%9C%20SHINJUKU%20SHOWDOWN%20ARC%20FULL%20FIGHT%20ANIMATION%20AMV.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
@@ -1437,40 +1437,52 @@
         return null;
       },
 
-      createAccount: function(username, password) {
+      // Fetch users from external JSON file
+      fetchUsers: async function() {
         try {
-          let accounts = JSON.parse(localStorage.getItem('userAccounts') || '{}');
-          
-          if (accounts[username]) {
-            return { success: false, error: 'Username already exists!' };
+          // You can replace this URL with your GitHub raw file URL or other public hosting
+          // Example: https://raw.githubusercontent.com/username/repository/main/users.json
+          const response = await fetch('./users.json');
+          if (!response.ok) {
+            throw new Error('Failed to fetch users data');
           }
-
-          accounts[username] = {
-            password: password, // In a real app, this should be hashed
-            createdAt: new Date().toISOString()
-          };
-
-          localStorage.setItem('userAccounts', JSON.stringify(accounts));
-          return { success: true };
+          const data = await response.json();
+          return data.users || [];
         } catch (e) {
-          console.error('Error creating account:', e);
-          return { success: false, error: 'Error creating account!' };
+          console.error('Error fetching users:', e);
+          showMessage('Error connecting to authentication server!', 'error');
+          return [];
         }
       },
 
-      validateLogin: function(username, password) {
+      createAccount: async function(username, password) {
+        // Note: Creating accounts with external JSON file requires server-side implementation
+        // For now, show message that registration is not available
+        return { success: false, error: 'Account registration is currently not available. Please contact admin.' };
+      },
+
+      validateLogin: async function(username, password) {
         try {
-          let accounts = JSON.parse(localStorage.getItem('userAccounts') || '{}');
+          const users = await this.fetchUsers();
           
-          if (!accounts[username]) {
-            return { success: false, error: 'Username not found!' };
+          if (users.length === 0) {
+            return { success: false, error: 'Unable to connect to authentication server!' };
+          }
+          
+          const user = users.find(u => u.userId === username && u.password === password);
+          
+          if (!user) {
+            return { success: false, error: 'Invalid username or password!' };
           }
 
-          if (accounts[username].password !== password) {
-            return { success: false, error: 'Incorrect password!' };
-          }
-
-          return { success: true };
+          return { 
+            success: true, 
+            userData: {
+              userId: user.userId,
+              name: user.name,
+              avatar: user.avatar
+            }
+          };
         } catch (e) {
           console.error('Error validating login:', e);
           return { success: false, error: 'Error validating login!' };
@@ -1609,7 +1621,7 @@
       document.getElementById('signup-error').style.display = 'none';
     }
 
-    function handleLogin() {
+    async function handleLogin() {
       const username = document.getElementById('login-username').value.trim();
       const password = document.getElementById('login-password').value;
       const errorDiv = document.getElementById('login-error');
@@ -1619,19 +1631,46 @@
         return;
       }
 
-      const result = authManager.validateLogin(username, password);
-      if (result.success) {
-        authManager.save({ username, loggedInAt: new Date().toISOString() });
-        closeAuthModal();
-        showMessage('Login successful!', 'success');
-        proceedToMainContent();
-        loadUserProgress();
-      } else {
-        showAuthError('login-error', result.error);
+      // Show loading state
+      const loginBtn = document.querySelector('.auth-modal .auth-btn');
+      const originalText = loginBtn.textContent;
+      loginBtn.textContent = 'Checking credentials...';
+      loginBtn.disabled = true;
+
+      try {
+        const result = await authManager.validateLogin(username, password);
+        if (result.success) {
+          // Save user data including profile info from JSON
+          authManager.save({ 
+            username: result.userData.userId, 
+            name: result.userData.name,
+            avatar: result.userData.avatar,
+            loggedInAt: new Date().toISOString() 
+          });
+          
+          // Update profile UI with user data from JSON
+          updateProfileUI({
+            name: result.userData.name,
+            avatar: result.userData.avatar
+          });
+          
+          closeAuthModal();
+          showMessage('Login successful!', 'success');
+          proceedToMainContent();
+          loadUserProgress();
+        } else {
+          showAuthError('login-error', result.error);
+        }
+      } catch (e) {
+        showAuthError('login-error', 'Connection error. Please try again!');
+      } finally {
+        // Reset button state
+        loginBtn.textContent = originalText;
+        loginBtn.disabled = false;
       }
     }
 
-    function handleSignup() {
+    async function handleSignup() {
       const username = document.getElementById('signup-username').value.trim();
       const password = document.getElementById('signup-password').value;
       const confirmPassword = document.getElementById('signup-confirm-password').value;
@@ -1656,15 +1695,29 @@
         return;
       }
 
-      const result = authManager.createAccount(username, password);
-      if (result.success) {
-        authManager.save({ username, loggedInAt: new Date().toISOString() });
-        closeAuthModal();
-        showMessage('Account created and logged in successfully!', 'success');
-        proceedToMainContent();
-        loadUserProgress();
-      } else {
-        showAuthError('signup-error', result.error);
+      // Show loading state
+      const signupBtn = document.querySelector('.auth-modal .auth-btn');
+      const originalText = signupBtn.textContent;
+      signupBtn.textContent = 'Creating account...';
+      signupBtn.disabled = true;
+
+      try {
+        const result = await authManager.createAccount(username, password);
+        if (result.success) {
+          authManager.save({ username, loggedInAt: new Date().toISOString() });
+          closeAuthModal();
+          showMessage('Account created and logged in successfully!', 'success');
+          proceedToMainContent();
+          loadUserProgress();
+        } else {
+          showAuthError('signup-error', result.error);
+        }
+      } catch (e) {
+        showAuthError('signup-error', 'Connection error. Please try again!');
+      } finally {
+        // Reset button state
+        signupBtn.textContent = originalText;
+        signupBtn.disabled = false;
       }
     }
 
