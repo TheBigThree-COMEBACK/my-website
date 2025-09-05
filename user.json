@@ -1,10 +1,22 @@
-[
-  {
-    "userId": "user1",
-    "password": "password123"
-  },
-  {
-    "userId": "user2",
-    "password": "password456"
-  }
-]
+
+  "users": [
+    {
+      "userId": "admin",
+      "password": "password123",
+      "name": "Admin User",
+      "avatar": "👑"
+    },
+    {
+      "userId": "user1", 
+      "password": "mypass",
+      "name": "John Doe",
+      "avatar": "👨"
+    },
+    {
+      "userId": "user2",
+      "password": "secret456", 
+      "name": "Jane Smith",
+      "avatar": "👩"
+    }
+  ]
+}
