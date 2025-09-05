@@ -1,0 +1,10 @@
+[
+  {
+    "userId": "user1",
+    "password": "password123"
+  },
+  {
+    "userId": "user2",
+    "password": "password456"
+  }
+]
