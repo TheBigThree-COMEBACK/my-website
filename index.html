@@ -1440,9 +1440,7 @@
       // Fetch users from external JSON file
       fetchUsers: async function() {
         try {
-          // You can replace this URL with your GitHub raw file URL or other public hosting
-          // Example: https://raw.githubusercontent.com/username/repository/main/users.json
-          const response = await fetch('./users.json');
+          const response = await fetch('https://raw.githubusercontent.com/toxicplyayzopp-ai/my-website/main/users.json');
           if (!response.ok) {
             throw new Error('Failed to fetch users data');
           }
