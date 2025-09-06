@@ -1605,6 +1605,19 @@ function updateAuthModalContent() {
     loginForm.style.display = 'block';
     signupForm.style.display = 'none';
     loggedInContent.style.display = 'none';
+    
+    // Add import account button if not exists
+    if (!document.getElementById('import-account-btn')) {
+      const importBtn = document.createElement('button');
+      importBtn.id = 'import-account-btn';
+      importBtn.className = 'auth-button';
+      importBtn.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
+      importBtn.style.marginTop = '10px';
+      importBtn.textContent = 'Import Friend\'s Account';
+      importBtn.onclick = () => document.getElementById('import-file').click();
+      
+      loginForm.appendChild(importBtn);
+    }
   }
 }
 
@@ -1974,64 +1987,117 @@ function handleSignup() {
       progressStorage.save(checkboxStates);
     }
 
-    function clearAllProgress() {
-      if (confirm('Are you sure you want to clear all progress? This action cannot be undone.')) {
-        // Clear all checkboxes
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-          checkbox.checked = false;
-        });
-        
-        // Clear from storage
-        progressStorage.clear();
-        
-        // Update progress display
-        updateProgress();
-        
-        showMessage('All progress cleared successfully!', 'success');
-      }
-    }
+  function clearAllProgress() {
+  if (confirm('Are you sure you want to clear ALL data (progress + profile)? This action cannot be undone.')) {
+    // Clear checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      checkbox.checked = false;
+    });
+    
+    // Clear from storage
+    progressStorage.clear();
+    
+    // Reset profile to default
+    profileManager.save({ name: 'Guest User', avatar: null });
+    updateProfileUI({ name: 'Guest User', avatar: null });
+    
+    updateProgress();
+    showMessage('All data cleared successfully!', 'success');
+  }
+}
 
-    function exportProgress() {
-      try {
-        const currentUser = authManager.load();
-        const progressData = progressStorage.load() || {};
+ function exportProgress() {
+  try {
+    const currentUser = authManager.load();
+    if (!currentUser) {
+      showMessage('Please login first to export data!', 'error');
+      return;
+    }
+    
+    const progressData = progressStorage.load() || {};
+    const profileData = profileManager.load() || {};
+    
+    // Get user credentials from registered users
+    const allUsers = authManager.getAllUsers();
+    const userCredentials = allUsers.find(u => u.userId === currentUser.username);
+    
+    const exportData = {
+      exportType: 'complete_user_data',
+      exportDate: new Date().toISOString(),
+      user: {
+        userId: currentUser.username,
+        password: userCredentials ? userCredentials.password : null,
+        name: currentUser.name || currentUser.username,
+        avatar: currentUser.avatar || '👤'
+      },
+      progress: progressData,
+      profile: profileData
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `complete-user-data-${exportData.user.userId}-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    showMessage('Complete user data exported successfully!', 'success');
+  } catch (e) {
+    console.error('Export error:', e);
+    showMessage('Error exporting user data!', 'error');
+  }
+}
+
+ function importProgress(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importData = JSON.parse(e.target.result);
+      
+      // Check if it's the new complete user data format
+      if (importData.exportType === 'complete_user_data' && importData.user) {
+        // Import user account
+        const allUsers = authManager.getAllUsers();
+        const existingUserIndex = allUsers.findIndex(u => u.userId === importData.user.userId);
         
-        const exportData = {
-          user: currentUser ? currentUser.username : 'guest',
-          exportDate: new Date().toISOString(),
-          progress: progressData
+        const userData = {
+          userId: importData.user.userId,
+          password: importData.user.password,
+          name: importData.user.name,
+          avatar: importData.user.avatar,
+          importedAt: new Date().toISOString()
         };
         
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        if (existingUserIndex >= 0) {
+          // Update existing user
+          allUsers[existingUserIndex] = userData;
+        } else {
+          // Add new user
+          allUsers.push(userData);
+        }
         
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(dataBlob);
-        link.download = `chapter-progress-${exportData.user}-${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
+        authManager.saveAllUsers(allUsers);
         
-        showMessage('Progress exported successfully!', 'success');
-      } catch (e) {
-        console.error('Export error:', e);
-        showMessage('Error exporting progress!', 'error');
-      }
-    }
-
-    function importProgress(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const importData = JSON.parse(e.target.result);
-          
-          if (!importData.progress) {
-            showMessage('Invalid progress file format!', 'error');
-            return;
-          }
-          
-          // Apply imported progress
+        // Auto-login as imported user
+        authManager.save({
+          username: importData.user.userId,
+          name: importData.user.name,
+          avatar: importData.user.avatar,
+          loggedInAt: new Date().toISOString()
+        });
+        
+        // Import profile data
+        if (importData.profile) {
+          profileManager.save(importData.profile);
+          updateProfileUI(importData.profile);
+        }
+        
+        // Import progress data
+        if (importData.progress) {
           progressStorage.save(importData.progress);
           
           // Update checkboxes
@@ -2042,17 +2108,35 @@ function handleSignup() {
           });
           
           updateProgress();
-          showMessage('Progress imported successfully!', 'success');
-        } catch (e) {
-          console.error('Import error:', e);
-          showMessage('Error importing progress file!', 'error');
         }
-      };
-      reader.readAsText(file);
-      
-      // Clear the file input
-      event.target.value = '';
+        
+        showMessage(`Successfully imported and logged in as ${importData.user.userId}!`, 'success');
+        closeAuthModal();
+        
+      } else if (importData.progress) {
+        // Handle old format (just progress)
+        progressStorage.save(importData.progress);
+        
+        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
+          const subject = checkbox.getAttribute('data-subject');
+          const key = subject + '_chapter_' + index;
+          checkbox.checked = importData.progress[key] || false;
+        });
+        
+        updateProgress();
+        showMessage('Progress imported successfully!', 'success');
+      } else {
+        showMessage('Invalid file format!', 'error');
+      }
+    } catch (e) {
+      console.error('Import error:', e);
+      showMessage('Error importing file!', 'error');
     }
+  };
+  reader.readAsText(file);
+  
+  event.target.value = '';
+}
 
     // Snowfall functions
     function createSnowfall() {
