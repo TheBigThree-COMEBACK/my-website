@@ -1029,6 +1029,7 @@
   <div id="blur-overlay" class="blur-overlay">
     <h1 class="entrance-title">THE BIG THREE</h1>
     <button class="enter-button" onclick="handleEnterClick()">Enter</button>
+    <button onclick="clearAllStorage()" style="position: absolute; bottom: 20px; right: 20px; padding: 10px; background: rgba(255,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer; font-size: 12px;">Clear Storage (Debug)</button>
   </div>
 
   <!-- Main Content -->
@@ -1771,11 +1772,17 @@
     }
 
     function handleEnterClick() {
-      if (authManager.isLoggedIn()) {
+      console.log('Enter clicked - checking login status...');
+      const loginStatus = authManager.isLoggedIn();
+      console.log('Login status:', loginStatus);
+      
+      if (loginStatus) {
         // User is already logged in, proceed to main content
+        console.log('User logged in, proceeding to main content');
         proceedToMainContent();
       } else {
         // User needs to authenticate first
+        console.log('User not logged in, opening auth modal');
         openAuthModal();
       }
     }
@@ -2122,6 +2129,13 @@
       // Initial progress update
       updateProgress();
       loadUserProgress();
+    }
+
+    // Debug function to clear all localStorage
+    function clearAllStorage() {
+      localStorage.clear();
+      console.log('All localStorage cleared');
+      alert('All storage cleared! Click Enter again to test.');
     }
 
     // Initialize the app when page loads
