@@ -981,7 +981,7 @@
         font-size: 14px;
       }
 
-      .users-button {
+      .accounts-button {
         right: 10px;
         font-size: 12px;
         padding: 10px 16px;
@@ -1029,7 +1029,6 @@
   <div id="blur-overlay" class="blur-overlay">
     <h1 class="entrance-title">THE BIG THREE</h1>
     <button class="enter-button" onclick="handleEnterClick()">Enter</button>
-    <button onclick="clearAllStorage()" style="position: absolute; bottom: 20px; right: 20px; padding: 10px; background: rgba(255,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; cursor: pointer; font-size: 12px;">Clear Storage (Debug)</button>
   </div>
 
   <!-- Main Content -->
@@ -1378,7 +1377,7 @@
         <div id="logged-in-content" class="auth-form-container" style="display: none;">
           <h2 class="auth-title">Account</h2>
           <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
-            Do you want to leave <span id="current-username" style="color: #fff; font-weight: bold;"></span>?
+            Welcome back, <span id="current-username" style="color: #fff; font-weight: bold;"></span>!
           </p>
           <div class="logout-option" onclick="handleLogout()">
             Logout
@@ -1398,7 +1397,6 @@
           👤
         </div>
         <p class="upload-text">Click avatar to upload image</p>
-        <button class="save-btn" onclick="document.getElementById('avatar-file').click()" style="margin-bottom: 20px; padding: 10px 20px; border-radius: 15px;">Change PFP</button>
         <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatarUpload(event)">
       </div>
       
@@ -1415,324 +1413,302 @@
   <div id="message-container"></div>
 
   <script>
-    // Simple hash function for password security
-    function simpleHash(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-      }
-      return hash.toString();
+    // Authentication Manager
+const authManager = {
+  save: function(userData) {
+    try {
+      localStorage.setItem('userAuth', JSON.stringify(userData));
+      console.log('User authentication saved successfully');
+    } catch (e) {
+      console.error('Error saving authentication:', e);
+      showMessage('Error saving user data!', 'error');
     }
-
-    // Authentication Manager - Updated to use localStorage instead of GitHub
-    const authManager = {
-      save: function(userData) {
-        try {
-          localStorage.setItem('userAuth', JSON.stringify(userData));
-          console.log('User authentication saved successfully');
-        } catch (e) {
-          console.error('Error saving authentication:', e);
-          showMessage('Error saving user data!', 'error');
-        }
-      },
-      
-      load: function() {
-        try {
-          const data = localStorage.getItem('userAuth');
-          if (data) {
-            return JSON.parse(data);
-          }
-        } catch (e) {
-          console.error('Error loading authentication:', e);
-        }
-        return null;
-      },
-
-      createAccount: function(username, password) {
-        try {
-          // Get existing users
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          
-          // Check if username already exists
-          if (users.find(u => u.username === username)) {
-            return { success: false, error: 'Username already exists!' };
-          }
-          
-          // Create new user
-          const newUser = {
-            username: username,
-            password: simpleHash(password),
-            name: username,
-            avatar: null,
-            createdAt: new Date().toISOString()
-          };
-          
-          // Add to users array and save
-          users.push(newUser);
-          localStorage.setItem('users', JSON.stringify(users));
-          
-          return { success: true };
-        } catch (e) {
-          console.error('Error creating account:', e);
-          return { success: false, error: 'Error creating account. Please try again.' };
-        }
-      },
-
-      validateLogin: function(username, password) {
-        try {
-          // Get users from localStorage
-          const users = JSON.parse(localStorage.getItem('users') || '[]');
-          
-          // Find user
-          const user = users.find(u => u.username === username && u.password === simpleHash(password));
-          
-          if (user) {
-            return Promise.resolve({ 
-              success: true, 
-              userData: {
-                userId: user.username,
-                name: user.name || user.username,
-                avatar: user.avatar || '👤'
-              }
-            });
-          } else {
-            return Promise.resolve({ success: false, error: 'Invalid username or password!' });
-          }
-        } catch (e) {
-          console.error('Error validating login:', e);
-          return Promise.resolve({ success: false, error: 'Error logging in. Please try again.' });
-        }
-      },
-
-      logout: function() {
-        try {
-          localStorage.removeItem('userAuth');
-          console.log('User logged out successfully');
-        } catch (e) {
-          console.error('Error logging out:', e);
-        }
-      },
-
-      isLoggedIn: function() {
-        const userData = this.load();
-        return userData && userData.username;
+  },
+  
+  load: function() {
+    try {
+      const data = localStorage.getItem('userAuth');
+      if (data) {
+        return JSON.parse(data);
       }
+    } catch (e) {
+      console.error('Error loading authentication:', e);
+    }
+    return null;
+  },
+
+  getAllUsers: function() {
+    try {
+      const users = localStorage.getItem('registeredUsers');
+      return users ? JSON.parse(users) : [];
+    } catch (e) {
+      console.error('Error loading users:', e);
+      return [];
+    }
+  },
+
+  saveAllUsers: function(users) {
+    try {
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
+      console.log('Users saved successfully');
+    } catch (e) {
+      console.error('Error saving users:', e);
+    }
+  },
+
+  createAccount: function(username, password) {
+    const users = this.getAllUsers();
+    const existingUser = users.find(u => u.userId === username);
+    if (existingUser) {
+      return { success: false, error: 'Username already exists!' };
+    }
+    const newUser = {
+      userId: username,
+      password: password,
+      name: username,
+      avatar: '👤',
+      createdAt: new Date().toISOString()
     };
+    users.push(newUser);
+    this.saveAllUsers(users);
+    return { success: true };
+  },
 
-    // Profile management
-    const profileManager = {
-      save: function(profileData) {
-        try {
-          localStorage.setItem('userProfile', JSON.stringify(profileData));
-          console.log('Profile saved successfully');
-        } catch (e) {
-          console.error('Error saving profile:', e);
-          showMessage('Error saving profile!', 'error');
-        }
-      },
-      
-      load: function() {
-        try {
-          const data = localStorage.getItem('userProfile');
-          if (data) {
-            return JSON.parse(data);
+  validateLogin: function(username, password) {
+    return new Promise((resolve) => {
+      const users = this.getAllUsers();
+      const user = users.find(u => u.userId === username && u.password === password);
+      if (user) {
+        resolve({ 
+          success: true, 
+          userData: {
+            userId: user.userId,
+            name: user.name || user.userId,
+            avatar: user.avatar || '👤'
           }
-        } catch (e) {
-          console.error('Error loading profile:', e);
-        }
-        return { name: 'Guest User', avatar: null };
-      }
-    };
-
-    // Progress storage using localStorage
-    const progressStorage = {
-      save: function(data) {
-        try {
-          const currentUser = authManager.load();
-          const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
-          localStorage.setItem(key, JSON.stringify(data));
-          console.log('Progress saved to localStorage successfully');
-        } catch (e) {
-          console.error('Error saving progress to localStorage:', e);
-          showMessage('Error saving progress!', 'error');
-        }
-      },
-      
-      load: function() {
-        try {
-          const currentUser = authManager.load();
-          const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
-          const data = localStorage.getItem(key);
-          if (data) {
-            console.log('Progress loaded from localStorage successfully');
-            return JSON.parse(data);
-          }
-        } catch (e) {
-          console.error('Error loading progress from localStorage:', e);
-          showMessage('Error loading progress!', 'error');
-        }
-        return null;
-      },
-      
-      clear: function() {
-        try {
-          const currentUser = authManager.load();
-          const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
-          localStorage.removeItem(key);
-          console.log('Progress cleared from localStorage');
-        } catch (e) {
-          console.error('Error clearing progress from localStorage:', e);
-          showMessage('Error clearing progress!', 'error');
-        }
-      }
-    };
-
-    // Authentication functions
-    function openAuthModal() {
-      const modal = document.getElementById('auth-modal-overlay');
-      updateAuthModalContent();
-      createSnowfall();
-      modal.classList.add('active');
-    }
-
-    function closeAuthModal() {
-      document.getElementById('auth-modal-overlay').classList.remove('active');
-      removeSnowfall();
-    }
-
-    function updateAuthModalContent() {
-      const loginForm = document.getElementById('login-form');
-      const signupForm = document.getElementById('signup-form');
-      const loggedInContent = document.getElementById('logged-in-content');
-
-      if (authManager.isLoggedIn()) {
-        loginForm.style.display = 'none';
-        signupForm.style.display = 'none';
-        loggedInContent.style.display = 'block';
-        
-        const userData = authManager.load();
-        document.getElementById('current-username').textContent = userData.username;
-      } else {
-        loginForm.style.display = 'block';
-        signupForm.style.display = 'none';
-        loggedInContent.style.display = 'none';
-      }
-    }
-
-    function showLoginForm() {
-      document.getElementById('login-form').style.display = 'block';
-      document.getElementById('signup-form').style.display = 'none';
-      clearAuthErrors();
-    }
-
-    function showSignupForm() {
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('signup-form').style.display = 'block';
-      clearAuthErrors();
-    }
-
-    function clearAuthErrors() {
-      document.getElementById('login-error').style.display = 'none';
-      document.getElementById('signup-error').style.display = 'none';
-    }
-
-    function handleLogin() {
-      const username = document.getElementById('login-username').value.trim();
-      const password = document.getElementById('login-password').value;
-      const errorDiv = document.getElementById('login-error');
-
-      if (!username || !password) {
-        showAuthError('login-error', 'Please fill in all fields!');
-        return;
-      }
-
-      // Show loading state
-      const loginBtn = document.querySelector('#login-form .auth-button');
-      const originalText = loginBtn.textContent;
-      loginBtn.textContent = 'Checking credentials...';
-      loginBtn.disabled = true;
-
-      authManager.validateLogin(username, password)
-        .then(result => {
-          if (result.success) {
-            // Save user data including profile info
-            authManager.save({ 
-              username: result.userData.userId, 
-              name: result.userData.name,
-              avatar: result.userData.avatar,
-              loggedInAt: new Date().toISOString() 
-            });
-            
-            // Update profile UI with user data
-            updateProfileUI({
-              name: result.userData.name,
-              avatar: result.userData.avatar
-            });
-            
-            closeAuthModal();
-            showMessage('Login successful!', 'success');
-            proceedToMainContent();
-            loadUserProgress();
-          } else {
-            showAuthError('login-error', result.error);
-          }
-        })
-        .catch(e => {
-          showAuthError('login-error', 'Connection error. Please try again!');
-        })
-        .finally(() => {
-          // Reset button state
-          loginBtn.textContent = originalText;
-          loginBtn.disabled = false;
         });
+      } else {
+        resolve({ success: false, error: 'Invalid user ID or password!' });
+      }
+    });
+  },
+
+  logout: function() {
+    try {
+      localStorage.removeItem('userAuth');
+      console.log('User logged out successfully');
+    } catch (e) {
+      console.error('Error logging out:', e);
     }
+  },
 
-    function handleSignup() {
-      const username = document.getElementById('signup-username').value.trim();
-      const password = document.getElementById('signup-password').value;
-      const confirmPassword = document.getElementById('signup-confirm-password').value;
+  isLoggedIn: function() {
+    const userData = this.load();
+    return userData && userData.username;
+  }
+};
 
-      console.log('Signup attempt:', { username, passwordLength: password.length, confirmMatch: password === confirmPassword });
-
-      if (!username || !password || !confirmPassword) {
-        showAuthError('signup-error', 'Please fill in all fields!');
-        return;
+// Profile management
+const profileManager = {
+  save: function(profileData) {
+    try {
+      localStorage.setItem('userProfile', JSON.stringify(profileData));
+      console.log('Profile saved successfully');
+    } catch (e) {
+      console.error('Error saving profile:', e);
+      showMessage('Error saving profile!', 'error');
+    }
+  },
+  
+  load: function() {
+    try {
+      const data = localStorage.getItem('userProfile');
+      if (data) {
+        return JSON.parse(data);
       }
+    } catch (e) {
+      console.error('Error loading profile:', e);
+    }
+    return { name: 'Guest User', avatar: null };
+  }
+};
 
-      if (username.length < 3) {
-        showAuthError('signup-error', 'Username must be at least 3 characters!');
-        return;
+// Progress storage using localStorage
+const progressStorage = {
+  save: function(data) {
+    try {
+      const currentUser = authManager.load();
+      const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
+      localStorage.setItem(key, JSON.stringify(data));
+      console.log('Progress saved to localStorage successfully');
+    } catch (e) {
+      console.error('Error saving progress to localStorage:', e);
+      showMessage('Error saving progress!', 'error');
+    }
+  },
+  
+  load: function() {
+    try {
+      const currentUser = authManager.load();
+      const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
+      const data = localStorage.getItem(key);
+      if (data) {
+        console.log('Progress loaded from localStorage successfully');
+        return JSON.parse(data);
       }
+    } catch (e) {
+      console.error('Error loading progress from localStorage:', e);
+      showMessage('Error loading progress!', 'error');
+    }
+    return null;
+  },
+  
+  clear: function() {
+    try {
+      const currentUser = authManager.load();
+      const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
+      localStorage.removeItem(key);
+      console.log('Progress cleared from localStorage');
+    } catch (e) {
+      console.error('Error clearing progress from localStorage:', e);
+      showMessage('Error clearing progress!', 'error');
+    }
+  }
+};
 
-      if (password.length < 4) {
-        showAuthError('signup-error', 'Password must be at least 4 characters!');
-        return;
-      }
+// Authentication functions
+function openAuthModal() {
+  const modal = document.getElementById('auth-modal-overlay');
+  updateAuthModalContent();
+  createSnowfall();
+  modal.classList.add('active');
+}
 
-      if (password !== confirmPassword) {
-        showAuthError('signup-error', 'Passwords do not match!');
-        return;
-      }
+function closeAuthModal() {
+  document.getElementById('auth-modal-overlay').classList.remove('active');
+  removeSnowfall();
+}
 
-      console.log('Creating account...');
-      const result = authManager.createAccount(username, password);
-      console.log('Account creation result:', result);
-      
+function updateAuthModalContent() {
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const loggedInContent = document.getElementById('logged-in-content');
+
+  if (authManager.isLoggedIn()) {
+    loginForm.style.display = 'none';
+    signupForm.style.display = 'none';
+    loggedInContent.style.display = 'block';
+    
+    const userData = authManager.load();
+    document.getElementById('current-username').textContent = userData.username;
+  } else {
+    loginForm.style.display = 'block';
+    signupForm.style.display = 'none';
+    loggedInContent.style.display = 'none';
+  }
+}
+
+function showLoginForm() {
+  document.getElementById('login-form').style.display = 'block';
+  document.getElementById('signup-form').style.display = 'none';
+  clearAuthErrors();
+}
+
+function showSignupForm() {
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('signup-form').style.display = 'block';
+  clearAuthErrors();
+}
+
+function clearAuthErrors() {
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('signup-error').style.display = 'none';
+}
+
+function handleLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  if (!username || !password) {
+    showAuthError('login-error', 'Please fill in all fields!');
+    return;
+  }
+
+  authManager.validateLogin(username, password)
+    .then(result => {
       if (result.success) {
-        console.log('Account created successfully, saving auth...');
-        authManager.save({ username, loggedInAt: new Date().toISOString() });
+        authManager.save({ 
+          username: result.userData.userId, 
+          name: result.userData.name,
+          avatar: result.userData.avatar,
+          loggedInAt: new Date().toISOString() 
+        });
+        
+        updateProfileUI({
+          name: result.userData.name,
+          avatar: result.userData.avatar
+        });
+        
         closeAuthModal();
-        showMessage('Account created and logged in successfully!', 'success');
+        showMessage('Login successful!', 'success');
         proceedToMainContent();
         loadUserProgress();
       } else {
-        console.log('Account creation failed:', result.error);
-        showAuthError('signup-error', result.error);
+        showAuthError('login-error', result.error);
       }
-    }
+    })
+    .catch(e => {
+      showAuthError('login-error', 'Connection error. Please try again!');
+    });
+}
 
+function handleSignup() {
+  const username = document.getElementById('signup-username').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+  if (!username || !password || !confirmPassword) {
+    showAuthError('signup-error', 'Please fill in all fields!');
+    return;
+  }
+
+  if (username.length < 3) {
+    showAuthError('signup-error', 'Username must be at least 3 characters!');
+    return;
+  }
+
+  if (password.length < 4) {
+    showAuthError('signup-error', 'Password must be at least 4 characters!');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showAuthError('signup-error', 'Passwords do not match!');
+    return;
+  }
+
+  const result = authManager.createAccount(username, password);
+  if (result.success) {
+    authManager.save({ 
+      username, 
+      name: username,
+      avatar: '👤',
+      loggedInAt: new Date().toISOString() 
+    });
+    
+    updateProfileUI({
+      name: username,
+      avatar: '👤'
+    });
+    
+    closeAuthModal();
+    showMessage('Account created and logged in successfully!', 'success');
+    proceedToMainContent();
+    loadUserProgress();
+  } else {
+    showAuthError('signup-error', result.error);
+  }
+}
     function showAuthError(elementId, message) {
       const errorDiv = document.getElementById(elementId);
       errorDiv.textContent = message;
@@ -1779,17 +1755,11 @@
     }
 
     function handleEnterClick() {
-      console.log('Enter clicked - checking login status...');
-      const loginStatus = authManager.isLoggedIn();
-      console.log('Login status:', loginStatus);
-      
-      if (loginStatus) {
+      if (authManager.isLoggedIn()) {
         // User is already logged in, proceed to main content
-        console.log('User logged in, proceeding to main content');
         proceedToMainContent();
       } else {
         // User needs to authenticate first
-        console.log('User not logged in, opening auth modal');
         openAuthModal();
       }
     }
@@ -2133,20 +2103,23 @@
         checkbox.addEventListener('change', updateProgress);
       });
       
-      // Initial progress update
-      updateProgress();
-      loadUserProgress();
+      // Close auth modal when clicking outside
+      document.getElementById('auth-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeAuthModal();
+        }
+      });
+      
+      // Close profile modal when clicking outside
+      document.getElementById('profile-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeProfileModal();
+        }
+      });
     }
 
-    // Debug function to clear all localStorage
-    function clearAllStorage() {
-      localStorage.clear();
-      console.log('All localStorage cleared');
-      alert('All storage cleared! Click Enter again to test.');
-    }
-
-    // Initialize the app when page loads
-    window.addEventListener('load', initializeApp);
+    // Start the app when page loads
+    document.addEventListener('DOMContentLoaded', initializeApp);
   </script>
 </body>
 </html>
