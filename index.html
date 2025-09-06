@@ -240,17 +240,15 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
     }
 
-    /* Snowfall Animation - Only for Auth Modals */
+    /* Snowfall Animation - Only for Auth Screens */
     .auth-snowfall {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 10;
-      border-radius: 20px;
-      overflow: hidden;
+      z-index: 1500;
     }
 
     .auth-snowflake {
@@ -259,22 +257,22 @@
       color: rgba(255, 255, 255, 0.9);
       font-size: 1.2em;
       animation: authSnowFall linear infinite;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
     }
 
     @keyframes authSnowFall {
       0% {
-        transform: translateY(-50px) rotate(0deg);
+        transform: translateY(-100vh) rotate(0deg);
         opacity: 0;
       }
-      10% {
+      5% {
         opacity: 1;
       }
-      90% {
+      95% {
         opacity: 1;
       }
       100% {
-        transform: translateY(500px) rotate(360deg);
+        transform: translateY(100vh) rotate(360deg);
         opacity: 0;
       }
     }
@@ -1399,12 +1397,12 @@
 
         <!-- Logged In Content -->
         <div id="logged-in-content" class="auth-form-container" style="display: none;">
-          <h2 class="auth-title">Account</h2>
-          <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
-            Welcome back, <span id="current-username" style="color: #fff; font-weight: bold;"></span>!
+          <h2 class="auth-title">Logout</h2>
+          <p style="color: rgba(255, 255, 255, 0.9); margin-bottom: 30px; font-size: 18px; font-weight: bold;">
+            Do you wanna log out <span id="current-username" style="color: #fff;"></span>!
           </p>
-          <div class="logout-option" onclick="handleLogout()">
-            Logout
+          <div class="logout-option" onclick="handleLogout()" style="background: linear-gradient(135deg, rgba(200, 50, 50, 0.8), rgba(150, 30, 30, 0.9)); border-color: rgba(255, 100, 100, 0.5);">
+            Log Out
           </div>
         </div>
       </div>
@@ -1684,12 +1682,19 @@
       const currentUser = authManager.load();
       
       if (currentUser) {
-        // If logged in, logout directly
-        handleLogout();
+        // If logged in, show logout confirmation
+        showLogoutConfirmation();
       } else {
         // If not logged in, show auth modal
         openAuthModal();
       }
+    }
+
+    function showLogoutConfirmation() {
+      const currentUser = authManager.load();
+      document.getElementById('current-username').textContent = currentUser.name || currentUser.username;
+      showLoggedInContent();
+      openAuthModal();
     }
 
     function updateAccountsButton() {
@@ -1799,8 +1804,28 @@
       const result = authManager.createAccount(username, password, confirmPassword, username);
       
       if (result.success) {
-        showMessage('Account created successfully! Please log in.', 'success');
-        showLoginForm();
+        // Automatically log the user in after successful signup
+        const userData = {
+          username: username,
+          name: username,
+          avatar: '👤'
+        };
+        
+        // Save user session
+        authManager.save(userData);
+        
+        // Update profile
+        updateProfileUI(userData);
+        
+        // Close modal and show success
+        closeAuthModal();
+        showMessage('Account created successfully! Welcome!', 'success');
+        
+        // Load user's progress
+        loadProgress();
+        
+        // Proceed to main content
+        proceedToMainContent();
         
         // Clear signup form
         document.getElementById('signup-username').value = '';
@@ -2114,30 +2139,27 @@
       // Remove existing snowfall first
       removeAuthSnowfall();
       
-      const authModal = document.querySelector('.auth-modal');
-      if (!authModal) return;
-      
       const snowfall = document.createElement('div');
       snowfall.className = 'auth-snowfall';
       snowfall.id = 'auth-snowfall';
       
-      // Create 30 snowflakes for the modal
-      for (let i = 0; i < 30; i++) {
+      // Create 40 snowflakes falling from the top
+      for (let i = 0; i < 40; i++) {
         const snowflake = document.createElement('div');
         snowflake.className = 'auth-snowflake';
         snowflake.innerHTML = '❄';
         
         // Random position and animation duration
         snowflake.style.left = Math.random() * 100 + '%';
-        snowflake.style.animationDuration = (Math.random() * 4 + 3) + 's';
-        snowflake.style.animationDelay = Math.random() * 3 + 's';
-        snowflake.style.fontSize = (Math.random() * 0.6 + 0.8) + 'em';
-        snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+        snowflake.style.animationDuration = (Math.random() * 4 + 4) + 's';
+        snowflake.style.animationDelay = Math.random() * 5 + 's';
+        snowflake.style.fontSize = (Math.random() * 0.8 + 0.8) + 'em';
+        snowflake.style.opacity = Math.random() * 0.7 + 0.3;
         
         snowfall.appendChild(snowflake);
       }
       
-      authModal.appendChild(snowfall);
+      document.body.appendChild(snowfall);
     }
 
     function removeAuthSnowfall() {
