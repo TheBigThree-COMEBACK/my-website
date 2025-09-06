@@ -1694,6 +1694,8 @@
       const password = document.getElementById('signup-password').value;
       const confirmPassword = document.getElementById('signup-confirm-password').value;
 
+      console.log('Signup attempt:', { username, passwordLength: password.length, confirmMatch: password === confirmPassword });
+
       if (!username || !password || !confirmPassword) {
         showAuthError('signup-error', 'Please fill in all fields!');
         return;
@@ -1714,14 +1716,19 @@
         return;
       }
 
+      console.log('Creating account...');
       const result = authManager.createAccount(username, password);
+      console.log('Account creation result:', result);
+      
       if (result.success) {
+        console.log('Account created successfully, saving auth...');
         authManager.save({ username, loggedInAt: new Date().toISOString() });
         closeAuthModal();
         showMessage('Account created and logged in successfully!', 'success');
         proceedToMainContent();
         loadUserProgress();
       } else {
+        console.log('Account creation failed:', result.error);
         showAuthError('signup-error', result.error);
       }
     }
