@@ -254,10 +254,10 @@
     .auth-snowflake {
       position: absolute;
       top: -10px;
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 1.2em;
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 0.6em;
       animation: authSnowFall linear infinite;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+      text-shadow: none;
     }
 
     @keyframes authSnowFall {
@@ -265,14 +265,14 @@
         transform: translateY(-100vh) rotate(0deg);
         opacity: 0;
       }
-      5% {
-        opacity: 1;
+      10% {
+        opacity: 0.8;
       }
-      95% {
-        opacity: 1;
+      90% {
+        opacity: 0.8;
       }
       100% {
-        transform: translateY(100vh) rotate(360deg);
+        transform: translateY(100vh) rotate(180deg);
         opacity: 0;
       }
     }
@@ -570,26 +570,51 @@
     }
 
     .avatar-preview {
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
-      background: linear-gradient(135deg, rgba(60, 60, 60, 0.8), rgba(40, 40, 40, 0.9));
-      border: 3px solid rgba(255, 255, 255, 0.3);
+      background: linear-gradient(135deg, rgba(80, 80, 80, 0.9), rgba(60, 60, 60, 0.95));
+      border: 4px solid rgba(120, 220, 255, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
-      margin: 0 auto 20px;
+      font-size: 50px;
+      margin: 0 auto 25px;
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      transition: all 0.4s ease;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(120, 220, 255, 0.2);
+      position: relative;
+    }
+
+    .avatar-preview::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, rgba(120, 220, 255, 0.3), rgba(180, 240, 255, 0.1), rgba(120, 220, 255, 0.3));
+      border-radius: 50%;
+      z-index: -1;
+      animation: avatarGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes avatarGlow {
+      from {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+      to {
+        opacity: 0.7;
+        transform: scale(1.02);
+      }
     }
 
     .avatar-preview:hover {
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: scale(1.05);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      border-color: rgba(180, 240, 255, 0.7);
+      transform: scale(1.08);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.8), 0 0 35px rgba(120, 220, 255, 0.4);
     }
 
     .avatar-preview img {
@@ -600,9 +625,11 @@
     }
 
     .upload-text {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 14px;
-      margin-bottom: 20px;
+      color: rgba(180, 240, 255, 0.9);
+      font-size: 15px;
+      margin-bottom: 25px;
+      font-weight: 500;
+      text-shadow: 0 2px 8px rgba(120, 220, 255, 0.3);
     }
 
     .name-input {
@@ -2143,18 +2170,18 @@
       snowfall.className = 'auth-snowfall';
       snowfall.id = 'auth-snowfall';
       
-      // Create 40 snowflakes falling from the top
-      for (let i = 0; i < 40; i++) {
+      // Create 12 subtle snowflakes falling from the top
+      for (let i = 0; i < 12; i++) {
         const snowflake = document.createElement('div');
         snowflake.className = 'auth-snowflake';
         snowflake.innerHTML = '❄';
         
         // Random position and animation duration
         snowflake.style.left = Math.random() * 100 + '%';
-        snowflake.style.animationDuration = (Math.random() * 4 + 4) + 's';
-        snowflake.style.animationDelay = Math.random() * 5 + 's';
-        snowflake.style.fontSize = (Math.random() * 0.8 + 0.8) + 'em';
-        snowflake.style.opacity = Math.random() * 0.7 + 0.3;
+        snowflake.style.animationDuration = (Math.random() * 4 + 8) + 's';
+        snowflake.style.animationDelay = Math.random() * 6 + 's';
+        snowflake.style.fontSize = (Math.random() * 0.3 + 0.5) + 'em';
+        snowflake.style.opacity = Math.random() * 0.15 + 0.08;
         
         snowfall.appendChild(snowflake);
       }
