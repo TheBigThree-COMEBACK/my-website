@@ -981,7 +981,7 @@
         font-size: 14px;
       }
 
-      .accounts-button {
+      .users-button {
         right: 10px;
         font-size: 12px;
         padding: 10px 16px;
@@ -1377,7 +1377,7 @@
         <div id="logged-in-content" class="auth-form-container" style="display: none;">
           <h2 class="auth-title">Account</h2>
           <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
-            Welcome back, <span id="current-username" style="color: #fff; font-weight: bold;"></span>!
+            Do you want to leave <span id="current-username" style="color: #fff; font-weight: bold;"></span>?
           </p>
           <div class="logout-option" onclick="handleLogout()">
             Logout
@@ -1397,6 +1397,7 @@
           👤
         </div>
         <p class="upload-text">Click avatar to upload image</p>
+        <button class="save-btn" onclick="document.getElementById('avatar-file').click()" style="margin-bottom: 20px; padding: 10px 20px; border-radius: 15px;">Change PFP</button>
         <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatarUpload(event)">
       </div>
       
@@ -1413,7 +1414,18 @@
   <div id="message-container"></div>
 
   <script>
-    // Authentication Manager
+    // Simple hash function for password security
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return hash.toString();
+    }
+
+    // Authentication Manager - Updated to use localStorage instead of GitHub
     const authManager = {
       save: function(userData) {
         try {
@@ -1438,36 +1450,59 @@
       },
 
       createAccount: function(username, password) {
-        return { success: false, error: 'Account registration is currently not available. Please contact admin.' };
+        try {
+          // Get existing users
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          
+          // Check if username already exists
+          if (users.find(u => u.username === username)) {
+            return { success: false, error: 'Username already exists!' };
+          }
+          
+          // Create new user
+          const newUser = {
+            username: username,
+            password: simpleHash(password),
+            name: username,
+            avatar: null,
+            createdAt: new Date().toISOString()
+          };
+          
+          // Add to users array and save
+          users.push(newUser);
+          localStorage.setItem('users', JSON.stringify(users));
+          
+          return { success: true };
+        } catch (e) {
+          console.error('Error creating account:', e);
+          return { success: false, error: 'Error creating account. Please try again.' };
+        }
       },
 
       validateLogin: function(username, password) {
-        // Fetch the user credentials JSON from GitHub
-        const userUrl = 'https://raw.githubusercontent.com/toxicplyayzopp-ai/my-website/main/users.json';
-        
-        return fetch(userUrl)
-          .then(response => response.json())
-          .then(users => {
-            // Check if user credentials match any user in the list
-            const user = users.find(u => u.userId === username && u.password === password);
-            
-            if (user) {
-              return { 
-                success: true, 
-                userData: {
-                  userId: user.userId,
-                  name: user.name || user.userId,
-                  avatar: user.avatar || '👤'
-                }
-              };
-            } else {
-              return { success: false, error: 'Invalid user ID or password!' };
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching users.json:', error);
-            return { success: false, error: 'There was an error with the login. Please try again later.' };
-          });
+        try {
+          // Get users from localStorage
+          const users = JSON.parse(localStorage.getItem('users') || '[]');
+          
+          // Find user
+          const user = users.find(u => u.username === username && u.password === simpleHash(password));
+          
+          if (user) {
+            return Promise.resolve({ 
+              success: true, 
+              userData: {
+                userId: user.username,
+                name: user.name || user.username,
+                avatar: user.avatar || '👤'
+              }
+            });
+          } else {
+            return Promise.resolve({ success: false, error: 'Invalid username or password!' });
+          }
+        } catch (e) {
+          console.error('Error validating login:', e);
+          return Promise.resolve({ success: false, error: 'Error logging in. Please try again.' });
+        }
       },
 
       logout: function() {
@@ -1613,7 +1648,7 @@
       }
 
       // Show loading state
-      const loginBtn = document.querySelector('.auth-modal .auth-btn');
+      const loginBtn = document.querySelector('#login-form .auth-button');
       const originalText = loginBtn.textContent;
       loginBtn.textContent = 'Checking credentials...';
       loginBtn.disabled = true;
@@ -1621,7 +1656,7 @@
       authManager.validateLogin(username, password)
         .then(result => {
           if (result.success) {
-            // Save user data including profile info from JSON
+            // Save user data including profile info
             authManager.save({ 
               username: result.userData.userId, 
               name: result.userData.name,
@@ -1629,7 +1664,7 @@
               loggedInAt: new Date().toISOString() 
             });
             
-            // Update profile UI with user data from JSON
+            // Update profile UI with user data
             updateProfileUI({
               name: result.userData.name,
               avatar: result.userData.avatar
@@ -2084,23 +2119,13 @@
         checkbox.addEventListener('change', updateProgress);
       });
       
-      // Close auth modal when clicking outside
-      document.getElementById('auth-modal-overlay').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeAuthModal();
-        }
-      });
-      
-      // Close profile modal when clicking outside
-      document.getElementById('profile-modal-overlay').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeProfileModal();
-        }
-      });
+      // Initial progress update
+      updateProgress();
+      loadUserProgress();
     }
 
-    // Start the app when page loads
-    document.addEventListener('DOMContentLoaded', initializeApp);
+    // Initialize the app when page loads
+    window.addEventListener('load', initializeApp);
   </script>
 </body>
 </html>
