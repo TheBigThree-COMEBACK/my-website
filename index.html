@@ -1442,18 +1442,40 @@
         });
       }
     };
+     async function saveProgressToGist(progressData) {
+      const currentUser = authManager.load();
+      if (!currentUser) return;
+      
+      try {
+        const usersData = await backend.loadUsers();
+        
+        if (!usersData.users[currentUser.username]) {
+          usersData.users[currentUser.username] = {
+            password: '',
+            name: currentUser.name || currentUser.username,
+            avatar: currentUser.avatar || null,
+            progress: {}
+          };
+        }
+        
+        usersData.users[currentUser.username].progress = progressData;
+        await backend.saveUsers(usersData);
+      } catch (error) {
+        console.error('Error saving progress to Gist:', error);
+      }
+    }
 
     // Authentication Manager
     const authManager = {
-  save: function(userData) {
-    try {
-      localStorage.setItem('userAuth', JSON.stringify(userData));
-      console.log('User authentication saved successfully');
-    } catch (e) {
-      console.error('Error saving authentication:', e);
-      showMessage('Error saving user data!', 'error');
-    }
-  },
+ save: function(userData) {
+  try {
+    localStorage.setItem('userAuth', JSON.stringify(userData));
+    console.log('User authentication saved successfully');
+  } catch (e) {
+    console.error('Error saving authentication:', e);
+    showMessage('Error saving user data!', 'error');
+  }
+},
       
       load: function() {
         try {
@@ -1636,10 +1658,11 @@ async function handleLogin() {
   }
 }
 
- async function handleSignup() {
+async function handleSignup() {
+  console.log('Signup attempt started');
   const username = document.getElementById('signup-username').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const confirmPassword = document.getElementById('signup-confirm-password').value;
+ const password = document.getElementById('signup-password').value;
+ const confirmPassword = document.getElementById('signup-confirm-password').value;
 
   if (!username || !password || !confirmPassword) {
     showAuthError('signup-error', 'Please fill in all fields!');
@@ -1668,10 +1691,17 @@ async function handleLogin() {
 
     await backend.saveUsers(usersData);
     
-    authManager.save({ username: username, name: username });
-    closeAuthModal();
-    showMessage('Account created!', 'success');
-    proceedToMainContent();
+authManager.save({ 
+  username: username, 
+  name: username, 
+  avatar: null 
+});
+
+// Update profile UI immediately
+updateProfileUI({ name: username, avatar: null });
+closeAuthModal();
+showMessage('Account created!', 'success');
+proceedToMainContent();
   } catch (e) {
     showAuthError('signup-error', 'Error creating account!');
   }
@@ -1954,27 +1984,14 @@ updateProgress();
         checkboxStates[key] = checkbox.checked;
       });
 
-      progressStorage.save(checkboxStates);
-// Save progress to GitHub Gist
+progressStorage.save(checkboxStates);
+
+// Save progress to GitHub Gist (only for logged-in users)
 const currentUser = authManager.load();
 if (currentUser) {
-  const progressData = {};
-  document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
-    const subject = checkbox.getAttribute('data-subject');
-    const key = subject + '_chapter_' + index;
-    progressData[key] = checkbox.checked;
-  });
-
-  backend.loadUsers().then(usersData => {
-    if (usersData.users[currentUser.username]) {
-      usersData.users[currentUser.username].progress = progressData;
-      backend.saveUsers(usersData);
-    }
-  }).catch(e => {
-    console.log('Progress save error:', e);
-  });
+  saveProgressToGist(checkboxStates);
 }
-    }
+}
 
     function clearAllProgress() {
       if (confirm('Are you sure you want to clear all progress? This action cannot be undone.')) {
