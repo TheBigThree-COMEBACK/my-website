@@ -805,19 +805,20 @@
 
     .progress-bar {
       height: 100%;
-      background: linear-gradient(90deg, #666, #999);
-      width: 0%;
+      background: linear-gradient(90deg, #4CAF50, #81C784);
       transition: width 0.5s ease;
       border-radius: 15px;
-      box-shadow: 0 2px 8px rgba(150, 150, 150, 0.3);
+      box-shadow: 0 2px 10px rgba(76, 175, 80, 0.4);
     }
 
     .progress-text {
       font-size: 1.2em;
-      font-weight: bold;
-      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.9);
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+      margin-bottom: 20px;
     }
 
+    /* Subject Progress Grid */
     .subject-progress {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -826,149 +827,163 @@
     }
 
     .subject-progress-item {
-      background: rgba(50, 50, 50, 0.2);
+      background: rgba(40, 40, 40, 0.2);
       padding: 15px;
       border-radius: 10px;
-      text-align: center;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .subject-progress-item h4 {
-      margin-bottom: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
       color: #fff;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
     }
 
     .mini-progress-bar {
       width: 100%;
-      height: 8px;
-      background: rgba(80, 80, 80, 0.5);
-      border-radius: 4px;
+      height: 15px;
+      background: rgba(60, 60, 60, 0.4);
+      border-radius: 10px;
       overflow: hidden;
-      margin-bottom: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 8px;
     }
 
     .mini-progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #777, #aaa);
-      width: 0%;
-      transition: width 0.3s ease;
-      border-radius: 4px;
+      background: linear-gradient(90deg, #2196F3, #64B5F6);
+      transition: width 0.5s ease;
+      border-radius: 10px;
     }
 
-    /* Button Container */
-    .button-container {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 20px;
-      flex-wrap: wrap;
+    .subject-progress-item span {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
     }
 
     /* Control Buttons */
+    .button-container {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
     .control-btn {
-      padding: 10px 20px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 25px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 20px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: bold;
       transition: all 0.3s ease;
       text-transform: uppercase;
       letter-spacing: 1px;
-    }
-
-    .clear-data-btn {
-      background: rgba(150, 50, 50, 0.6);
       color: white;
     }
 
+    .clear-data-btn {
+      background: linear-gradient(135deg, rgba(150, 50, 50, 0.6), rgba(120, 30, 30, 0.8));
+    }
+
     .clear-data-btn:hover {
-      background: rgba(180, 60, 60, 0.8);
+      background: linear-gradient(135deg, rgba(180, 60, 60, 0.8), rgba(150, 40, 40, 1));
       border-color: rgba(255, 120, 120, 0.5);
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(150, 50, 50, 0.4);
     }
 
     .export-btn {
-      background: rgba(50, 100, 150, 0.6);
-      color: white;
+      background: linear-gradient(135deg, rgba(50, 100, 150, 0.6), rgba(30, 80, 120, 0.8));
     }
 
     .export-btn:hover {
-      background: rgba(60, 120, 180, 0.8);
-      border-color: rgba(100, 150, 255, 0.5);
+      background: linear-gradient(135deg, rgba(60, 120, 180, 0.8), rgba(40, 100, 150, 1));
+      border-color: rgba(120, 180, 255, 0.5);
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(50, 100, 150, 0.4);
     }
 
     .import-btn {
-      background: rgba(50, 150, 100, 0.6);
-      color: white;
+      background: linear-gradient(135deg, rgba(100, 50, 150, 0.6), rgba(80, 30, 120, 0.8));
     }
 
     .import-btn:hover {
-      background: rgba(60, 180, 120, 0.8);
-      border-color: rgba(100, 255, 150, 0.5);
+      background: linear-gradient(135deg, rgba(120, 60, 180, 0.8), rgba(100, 40, 150, 1));
+      border-color: rgba(180, 120, 255, 0.5);
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(50, 150, 100, 0.4);
+      box-shadow: 0 5px 15px rgba(100, 50, 150, 0.4);
     }
 
-    /* Hidden File Input */
-    #import-file, #avatar-file {
+    #import-file {
       display: none;
     }
 
-    /* Success/Error Messages */
-    .message {
+    /* Message System */
+    #message-container {
       position: fixed;
       top: 20px;
       right: 20px;
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      z-index: 1000;
-      opacity: 0;
-      transform: translateX(100%);
-      transition: all 0.3s ease;
+      z-index: 10000;
+      max-width: 350px;
     }
 
-    .message.show {
-      opacity: 1;
-      transform: translateX(0);
+    .message {
+      background: rgba(40, 40, 40, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      color: white;
+      font-size: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      animation: slideIn 0.3s ease;
+      position: relative;
+      word-wrap: break-word;
     }
 
     .message.success {
-      background: rgba(50, 150, 50, 0.9);
-      color: white;
-      border: 1px solid rgba(100, 255, 100, 0.3);
+      border-color: rgba(76, 175, 80, 0.6);
+      background: rgba(40, 100, 40, 0.9);
     }
 
     .message.error {
-      background: rgba(150, 50, 50, 0.9);
-      color: white;
-      border: 1px solid rgba(255, 100, 100, 0.3);
+      border-color: rgba(244, 67, 54, 0.6);
+      background: rgba(100, 40, 40, 0.9);
     }
 
-    /* Responsive */
+    .message.info {
+      border-color: rgba(33, 150, 243, 0.6);
+      background: rgba(40, 80, 120, 0.9);
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Mobile Responsiveness */
     @media (max-width: 768px) {
       .entrance-title {
         font-size: 2.5em;
         letter-spacing: 4px;
       }
-      
+
       .enter-button {
         padding: 15px 40px;
         font-size: 1.2em;
-      }
-      
-      .header h1 {
-        font-size: 2em;
+        letter-spacing: 2px;
       }
 
-      .profile-section {
-        left: 10px;
+      .header h1 {
+        font-size: 1.8em;
       }
 
       .profile-avatar {
@@ -981,7 +996,7 @@
         font-size: 14px;
       }
 
-      .accounts-button {
+      .users-button {
         right: 10px;
         font-size: 12px;
         padding: 10px 16px;
@@ -1016,6 +1031,7 @@
     <video id="background-video" autoplay loop muted style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
       <source src="https://archive.org/download/judas-shinjuku-showdown-arc-full-fight-animation-amv/JUDAS%20%EF%BD%9C%20SHINJUKU%20SHOWDOWN%20ARC%20FULL%20FIGHT%20ANIMATION%20AMV.mp4" type="video/mp4">
       Your browser does not support the video tag.
+    </source>
     </video>
   </div>
 
@@ -1413,7 +1429,80 @@
   <div id="message-container"></div>
 
   <script>
-    // Authentication Manager
+    // GitHub Integration Manager
+    const githubManager = {
+      baseUrl: 'https://api.github.com/repos/toxicplyayzopp-ai/my-website',
+      rawUrl: 'https://raw.githubusercontent.com/toxicplyayzopp-ai/my-website/main/user.json',
+      
+      // Fetch user data from GitHub
+      fetchUserData: async function() {
+        try {
+          const response = await fetch(this.rawUrl + '?t=' + Date.now());
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+          const data = await response.json();
+          // Handle both formats: direct array or {users: array}
+          return data.users || data;
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          return [];
+        }
+      },
+
+      // Update user data on GitHub (requires GitHub token)
+      updateUserData: async function(userData, githubToken) {
+        if (!githubToken) {
+          throw new Error('GitHub token required for updating user data');
+        }
+
+        try {
+          // First get the current file to get the SHA
+          const getResponse = await fetch(`${this.baseUrl}/contents/user.json`, {
+            headers: {
+              'Authorization': `Bearer ${githubToken}`,
+              'Accept': 'application/vnd.github+json'
+            }
+          });
+
+          if (!getResponse.ok) {
+            throw new Error('Failed to get current file');
+          }
+
+          const currentFile = await getResponse.json();
+          const sha = currentFile.sha;
+
+          // Encode the new content
+          const content = btoa(JSON.stringify(userData, null, 2));
+
+          // Update the file
+          const updateResponse = await fetch(`${this.baseUrl}/contents/user.json`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${githubToken}`,
+              'Accept': 'application/vnd.github+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: 'Update user data',
+              content: content,
+              sha: sha
+            })
+          });
+
+          if (!updateResponse.ok) {
+            throw new Error('Failed to update user data');
+          }
+
+          return await updateResponse.json();
+        } catch (error) {
+          console.error('Error updating user data:', error);
+          throw error;
+        }
+      }
+    };
+
+    // Authentication Manager with GitHub Integration
     const authManager = {
       save: function(userData) {
         try {
@@ -1437,37 +1526,68 @@
         return null;
       },
 
-      createAccount: function(username, password) {
-        return { success: false, error: 'Account registration is currently not available. Please contact admin.' };
+      createAccount: async function(username, password) {
+        try {
+          // Validate input
+          if (!username || !password) {
+            return { success: false, error: 'Username and password are required!' };
+          }
+
+          if (username.length < 3) {
+            return { success: false, error: 'Username must be at least 3 characters long!' };
+          }
+
+          if (password.length < 6) {
+            return { success: false, error: 'Password must be at least 6 characters long!' };
+          }
+
+          // Fetch current user data
+          const userData = await githubManager.fetchUserData();
+          
+          // Check if user already exists
+          const existingUser = userData.find(u => u.userId === username);
+          if (existingUser) {
+            return { success: false, error: 'Username already exists!' };
+          }
+
+          // Note: For now, we'll show a message that account creation requires GitHub token
+          // In a real implementation, you would need a GitHub API token to update the user.json file
+          return { 
+            success: false, 
+            error: 'Account creation is currently disabled. Please contact administrator to create an account.' 
+          };
+          
+        } catch (error) {
+          console.error('Error creating account:', error);
+          return { success: false, error: 'Error creating account. Please try again later.' };
+        }
       },
 
-      validateLogin: function(username, password) {
-        // Fetch the user credentials JSON from GitHub
-        const userUrl = 'https://raw.githubusercontent.com/toxicplyayzopp-ai/my-website/main/users.json';
-        
-        return fetch(userUrl)
-          .then(response => response.json())
-          .then(users => {
-            // Check if user credentials match any user in the list
-            const user = users.find(u => u.userId === username && u.password === password);
-            
-            if (user) {
-              return { 
-                success: true, 
-                userData: {
-                  userId: user.userId,
-                  name: user.name || user.userId,
-                  avatar: user.avatar || '👤'
-                }
-              };
-            } else {
-              return { success: false, error: 'Invalid user ID or password!' };
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching users.json:', error);
-            return { success: false, error: 'There was an error with the login. Please try again later.' };
-          });
+      validateLogin: async function(username, password) {
+        try {
+          // Fetch user data from GitHub
+          const users = await githubManager.fetchUserData();
+          
+          // Check if user credentials match any user in the list
+          const user = users.find(u => u.userId === username && u.password === password);
+          
+          if (user) {
+            return { 
+              success: true, 
+              userData: {
+                userId: user.userId,
+                name: user.name || user.userId,
+                avatar: user.avatar || '👤',
+                progress: user.progress || {}
+              }
+            };
+          } else {
+            return { success: false, error: 'Invalid user ID or password!' };
+          }
+        } catch (error) {
+          console.error('Error validating login:', error);
+          return { success: false, error: 'There was an error with the login. Please try again later.' };
+        }
       },
 
       logout: function() {
@@ -1553,17 +1673,76 @@
       }
     };
 
-    // Authentication functions
+    // UI Functions
+    function showMessage(message, type = 'info') {
+      const container = document.getElementById('message-container');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+      messageDiv.textContent = message;
+      
+      container.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        if (messageDiv.parentNode) {
+          messageDiv.parentNode.removeChild(messageDiv);
+        }
+      }, 5000);
+    }
+
+    function handleEnterClick() {
+      if (authManager.isLoggedIn()) {
+        // User is already logged in, proceed to main content
+        proceedToMainContent();
+      } else {
+        // User needs to authenticate first
+        openAuthModal();
+      }
+    }
+
+    function proceedToMainContent() {
+      const blurOverlay = document.getElementById('blur-overlay');
+      const mainContent = document.getElementById('main-content');
+      const video = document.getElementById('background-video');
+      const audio = document.getElementById('background-audio');
+      
+      // Hide the overlay
+      blurOverlay.classList.add('hidden');
+      
+      // Show main content
+      mainContent.classList.add('unblurred');
+      
+      // Start video
+      video.play().catch(e => console.log('Video play failed:', e));
+      
+      // Start audio with higher volume
+      audio.volume = 0.9;
+      audio.play().then(() => {
+        console.log('Audio started successfully');
+      }).catch(e => {
+        console.log('Audio play failed:', e);
+        // Fallback: try to play audio when user interacts
+        document.addEventListener('click', function playAudio() {
+          audio.play();
+          document.removeEventListener('click', playAudio);
+        }, { once: true });
+      });
+      
+      loadUserProgress();
+    }
+
+    // Auth Modal Functions
     function openAuthModal() {
-      const modal = document.getElementById('auth-modal-overlay');
+      const authModal = document.getElementById('auth-modal-overlay');
       updateAuthModalContent();
       createSnowfall();
-      modal.classList.add('active');
+      authModal.classList.add('active');
     }
 
     function closeAuthModal() {
-      document.getElementById('auth-modal-overlay').classList.remove('active');
+      const authModal = document.getElementById('auth-modal-overlay');
+      authModal.classList.remove('active');
       removeSnowfall();
+      clearAuthErrors();
     }
 
     function updateAuthModalContent() {
@@ -1588,12 +1767,23 @@
     function showLoginForm() {
       document.getElementById('login-form').style.display = 'block';
       document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('logged-in-content').style.display = 'none';
       clearAuthErrors();
     }
 
     function showSignupForm() {
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('signup-form').style.display = 'block';
+      document.getElementById('logged-in-content').style.display = 'none';
+      clearAuthErrors();
+    }
+
+    function showLoggedInContent() {
+      const userData = authManager.load();
+      document.getElementById('current-username').textContent = userData?.userId || 'Unknown';
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('logged-in-content').style.display = 'block';
       clearAuthErrors();
     }
 
@@ -1613,7 +1803,7 @@
       }
 
       // Show loading state
-      const loginBtn = document.querySelector('.auth-modal .auth-btn');
+      const loginBtn = document.querySelector('.auth-modal .auth-button');
       const originalText = loginBtn.textContent;
       loginBtn.textContent = 'Checking credentials...';
       loginBtn.disabled = true;
@@ -1690,12 +1880,6 @@
       }
     }
 
-    function showAuthError(elementId, message) {
-      const errorDiv = document.getElementById(elementId);
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-    }
-
     function handleLogout() {
       authManager.logout();
       updateAuthModalContent();
@@ -1716,69 +1900,17 @@
       loadUserProgress();
     }
 
-    function loadUserProgress() {
-      const savedProgress = progressStorage.load();
-      if (savedProgress) {
-        // Restore checkbox states
-        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
-          const subject = checkbox.getAttribute('data-subject');
-          const key = subject + '_chapter_' + index;
-          checkbox.checked = savedProgress[key] || false;
-        });
-        updateProgress();
-      } else {
-        // Clear all checkboxes for new user
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-          checkbox.checked = false;
-        });
-        updateProgress();
-      }
+    function showAuthError(elementId, message) {
+      const errorDiv = document.getElementById(elementId);
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
     }
 
-    function handleEnterClick() {
-      if (authManager.isLoggedIn()) {
-        // User is already logged in, proceed to main content
-        proceedToMainContent();
-      } else {
-        // User needs to authenticate first
-        openAuthModal();
-      }
-    }
-
-    function proceedToMainContent() {
-      const blurOverlay = document.getElementById('blur-overlay');
-      const mainContent = document.getElementById('main-content');
-      const video = document.getElementById('background-video');
-      const audio = document.getElementById('background-audio');
-      
-      // Hide the overlay
-      blurOverlay.classList.add('hidden');
-      
-      // Show main content
-      mainContent.classList.add('unblurred');
-      
-      // Start video
-      video.play().catch(e => console.log('Video play failed:', e));
-      
-      // Start audio with higher volume
-      audio.volume = 0.9;
-      audio.play().then(() => {
-        console.log('Audio started successfully');
-      }).catch(e => {
-        console.log('Audio play failed:', e);
-        // Fallback: try to play audio when user interacts
-        document.addEventListener('click', function playAudio() {
-          audio.play();
-          document.removeEventListener('click', playAudio);
-        }, { once: true });
-      });
-      
-      loadUserProgress();
-    }
-
-    // Profile functions
+    // Profile Modal Functions
     function openProfileModal() {
       const modal = document.getElementById('profile-modal-overlay');
+      modal.classList.add('active');
+      
       const profileData = profileManager.load();
       
       // Set current values
@@ -1790,8 +1922,6 @@
       } else {
         modalAvatar.innerHTML = '👤';
       }
-      
-      modal.classList.add('active');
     }
 
     function closeProfileModal() {
@@ -1800,20 +1930,14 @@
 
     function handleAvatarUpload(event) {
       const file = event.target.files[0];
-      if (!file) return;
-      
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        showMessage('Image size should be less than 5MB!', 'error');
-        return;
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('modal-avatar-preview').innerHTML = 
+            `<img src="${e.target.result}" alt="Avatar">`;
+        };
+        reader.readAsDataURL(file);
       }
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const modalAvatar = document.getElementById('modal-avatar-preview');
-        modalAvatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
-      };
-      reader.readAsDataURL(file);
     }
 
     function saveProfile() {
@@ -1848,33 +1972,14 @@
       }
     }
 
-    // Message system
-    function showMessage(text, type = 'success') {
-      const container = document.getElementById('message-container');
-      const message = document.createElement('div');
-      message.className = `message ${type}`;
-      message.textContent = text;
-      
-      container.appendChild(message);
-      
-      // Trigger show animation
-      setTimeout(() => message.classList.add('show'), 10);
-      
-      // Auto remove after 3 seconds
-      setTimeout(() => {
-        message.classList.remove('show');
-        setTimeout(() => container.removeChild(message), 300);
-      }, 3000);
-    }
-
-    // Subject navigation
+    // Subject Navigation
     function showSubject(subject) {
       // Hide all sections
       document.querySelectorAll('.subject-section').forEach(section => {
         section.classList.remove('active');
       });
       
-      // Remove active from all buttons
+      // Remove active class from all nav buttons
       document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
       });
@@ -1882,70 +1987,77 @@
       // Show selected section
       document.getElementById(subject).classList.add('active');
       
-      // Add active to clicked button
+      // Add active class to clicked button
       event.target.classList.add('active');
     }
 
-    function updateProgress() {
-      console.log('updateProgress() called');
-      
-      // Count completed chapters for each subject
-      const subjectCounts = {
-        mathematics: { total: 10, completed: 0 },
-        science: { total: 7, completed: 0 },
-        english: { total: 19, completed: 0 },
-        hindi: { total: 11, completed: 0 },
-        sst: { total: 14, completed: 0 }
-      };
+    function loadUserProgress() {
+      const savedProgress = progressStorage.load();
+      if (savedProgress) {
+        // Restore checkbox states
+        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
+          const subject = checkbox.getAttribute('data-subject');
+          const key = subject + '_chapter_' + index;
+          checkbox.checked = savedProgress[key] || false;
+        });
+        updateProgress();
+      } else {
+        // Clear all checkboxes for new user
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+          checkbox.checked = false;
+        });
+        updateProgress();
+      }
+    }
 
-      // Count checked boxes for each subject
-      document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        const subject = checkbox.getAttribute('data-subject');
-        if (checkbox.checked && subjectCounts[subject]) {
-          subjectCounts[subject].completed++;
+    function updateProgress() {
+      const subjects = ['mathematics', 'science', 'english', 'hindi', 'sst'];
+      const subjectTotals = {
+        mathematics: 10,
+        science: 7,
+        english: 19,
+        hindi: 11,
+        sst: 14
+      };
+      
+      let totalCompleted = 0;
+      let totalChapters = 0;
+      
+      subjects.forEach(subject => {
+        const checkboxes = document.querySelectorAll(`input[data-subject="${subject}"]`);
+        const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
+        const total = subjectTotals[subject];
+        
+        totalCompleted += completed;
+        totalChapters += total;
+        
+        // Update subject progress
+        const progressElement = document.getElementById(`${subject}-progress`);
+        const textElement = document.getElementById(`${subject}-text`);
+        
+        if (progressElement) {
+          const percentage = (completed / total) * 100;
+          progressElement.style.width = percentage + '%';
+        }
+        
+        if (textElement) {
+          textElement.textContent = `${completed}/${total}`;
         }
       });
-
-      // Calculate overall progress
-      let totalChapters = 0;
-      let completedChapters = 0;
       
-      Object.values(subjectCounts).forEach(subject => {
-        totalChapters += subject.total;
-        completedChapters += subject.completed;
-      });
-
-      const overallProgress = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
-
-      // Update overall progress bar
-      const overallBar = document.getElementById('overall-progress-bar');
-      const overallText = document.getElementById('overall-progress-text');
+      // Update overall progress
+      const overallPercentage = (totalCompleted / totalChapters) * 100;
+      document.getElementById('overall-progress-bar').style.width = overallPercentage + '%';
+      document.getElementById('overall-progress-text').textContent = 
+        Math.round(overallPercentage) + '% Completed';
       
-      if (overallBar) overallBar.style.width = overallProgress + '%';
-      if (overallText) overallText.textContent = Math.round(overallProgress) + '% Completed (' + completedChapters + '/' + totalChapters + ')';
+      // Save progress
+      saveProgress();
+    }
 
-      // Update individual subject progress
-      Object.keys(subjectCounts).forEach(subject => {
-        const subjectProgress = subjectCounts[subject].total > 0 ? (subjectCounts[subject].completed / subjectCounts[subject].total) * 100 : 0;
-        
-        const subjectIdMap = {
-          'mathematics': 'math',
-          'science': 'science', 
-          'english': 'english',
-          'hindi': 'hindi',
-          'sst': 'sst'
-        };
-        
-        const htmlId = subjectIdMap[subject] || subject;
-        const progressElement = document.getElementById(htmlId + '-progress');
-        const textElement = document.getElementById(htmlId + '-text');
-        
-        if (progressElement) progressElement.style.width = subjectProgress + '%';
-        if (textElement) textElement.textContent = subjectCounts[subject].completed + '/' + subjectCounts[subject].total;
-      });
-
-      // Save progress using improved key system
+    function saveProgress() {
       const checkboxStates = {};
+      
       document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
         const subject = checkbox.getAttribute('data-subject');
         const key = subject + '_chapter_' + index;
