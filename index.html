@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chapter Progress Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Force landscape orientation on mobile -->
+<meta name="screen-orientation" content="landscape">
+<meta name="orientation" content="landscape">  <title>Chapter Progress Tracker</title>
   <style>
     * {
       margin: 0;
@@ -11,14 +13,41 @@
       box-sizing: border-box;
     }
 
-    body {
-      font-family: 'Arial', sans-serif;
-      color: white;
-      background: #000;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+body {
+  font-family: 'Arial', sans-serif;
+  color: white;
+  background: #000;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
+/* Force landscape orientation on mobile devices */
+@media screen and (max-width: 768px) and (orientation: portrait) {
+  body {
+    transform: rotate(90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+  
+  .landscape-warning {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 10000;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+}
     /* Video Background */
     .video-background {
       position: fixed;
@@ -1011,13 +1040,20 @@
   </style>
 </head>
 <body>
-  <!-- Video Background (Silent initially) -->
-  <div class="video-background">
-    <video id="background-video" autoplay loop muted style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
-      <source src="https://archive.org/download/judas-shinjuku-showdown-arc-full-fight-animation-amv/JUDAS%20%EF%BD%9C%20SHINJUKU%20SHOWDOWN%20ARC%20FULL%20FIGHT%20ANIMATION%20AMV.mp4" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
+ <!-- Video Background (Silent initially) -->
+<div class="video-background">
+  <video id="background-video" autoplay loop muted style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;">
+    <source src="https://archive.org/download/judas-shinjuku-showdown-arc-full-fight-animation-amv/JUDAS%20%EF%BD%9C%20SHINJUKU%20SHOWDOWN%20ARC%20FULL%20FIGHT%20ANIMATION%20AMV.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+<!-- Landscape Warning for Mobile Portrait -->
+<div id="landscape-warning" class="landscape-warning" style="display: none;">
+  <h3>📱➡️📱</h3>
+  <p><strong>For the best experience, please rotate your device to landscape mode</strong></p>
+  <p style="font-size: 12px; margin-top: 10px; opacity: 0.8;">This app is optimized for landscape viewing</p>
+</div>
 
   <!-- Background Audio -->
   <audio id="background-audio" loop>
@@ -1606,19 +1642,33 @@ function updateAuthModalContent() {
     signupForm.style.display = 'none';
     loggedInContent.style.display = 'none';
     
-    // Add import account button if not exists
-    if (!document.getElementById('import-account-btn')) {
-      const importBtn = document.createElement('button');
-      importBtn.id = 'import-account-btn';
-      importBtn.className = 'auth-button';
-      importBtn.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
-      importBtn.style.marginTop = '10px';
-      importBtn.textContent = 'Import Friend\'s Account';
-      importBtn.onclick = () => document.getElementById('import-file').click();
-      
-      loginForm.appendChild(importBtn);
-    }
-  }
+// Add import account button if not exists
+if (!document.getElementById('import-account-btn')) {
+  const importBtn = document.createElement('button');
+  importBtn.id = 'import-account-btn';
+  importBtn.className = 'auth-button';
+  importBtn.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
+  importBtn.style.marginTop = '10px';
+  importBtn.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
+  importBtn.textContent = 'Import Friend\'s Account';
+  importBtn.onclick = () => document.getElementById('import-file').click();
+  
+  // Add hover effect
+  importBtn.addEventListener('mouseenter', function() {
+    this.style.background = 'linear-gradient(135deg, rgba(120, 70, 180, 1), rgba(100, 50, 150, 1))';
+    this.style.borderColor = 'rgba(150, 100, 200, 0.7)';
+    this.style.transform = 'translateY(-3px)';
+    this.style.boxShadow = '0 12px 30px rgba(100, 50, 150, 0.5), 0 0 40px rgba(100, 50, 150, 0.3)';
+  });
+  
+  importBtn.addEventListener('mouseleave', function() {
+    this.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
+    this.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+    this.style.transform = 'translateY(0)';
+    this.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
+  });
+  
+  loginForm.appendChild(importBtn);
 }
 
 function showLoginForm() {
@@ -2170,37 +2220,54 @@ function handleSignup() {
       }
     }
 
-    // Initialize app
-    function initializeApp() {
-      // Load and display profile
-      const profileData = profileManager.load();
-      updateProfileUI(profileData);
-      
-      // Check if user is logged in and proceed accordingly
-      if (authManager.isLoggedIn()) {
-        // If already logged in, the enter button will skip auth
-        console.log('User already logged in');
-      }
-      
-      // Add event listeners to checkboxes
-      document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', updateProgress);
-      });
-      
-      // Close auth modal when clicking outside
-      document.getElementById('auth-modal-overlay').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeAuthModal();
-        }
-      });
-      
-      // Close profile modal when clicking outside
-      document.getElementById('profile-modal-overlay').addEventListener('click', function(e) {
-        if (e.target === this) {
-          closeProfileModal();
-        }
-      });
+ // Initialize app
+function initializeApp() {
+  // Check orientation and show warning if needed
+  checkOrientation();
+  window.addEventListener('orientationchange', checkOrientation);
+  window.addEventListener('resize', checkOrientation);
+  
+  // Load and display profile
+  const profileData = profileManager.load();
+  updateProfileUI(profileData);
+  
+  // Check if user is logged in and proceed accordingly
+  if (authManager.isLoggedIn()) {
+    // If already logged in, the enter button will skip auth
+    console.log('User already logged in');
+  }
+  
+  // Add event listeners to checkboxes
+  document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', updateProgress);
+  });
+  
+  // Close auth modal when clicking outside
+  document.getElementById('auth-modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeAuthModal();
     }
+  });
+  
+  // Close profile modal when clicking outside
+  document.getElementById('profile-modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeProfileModal();
+    }
+  });
+}
+
+function checkOrientation() {
+  const isMobile = window.innerWidth <= 768;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const warning = document.getElementById('landscape-warning');
+  
+  if (isMobile && isPortrait) {
+    warning.style.display = 'block';
+  } else {
+    warning.style.display = 'none';
+  }
+}
 
     // Start the app when page loads
     document.addEventListener('DOMContentLoaded', initializeApp);
