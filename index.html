@@ -1651,33 +1651,33 @@ function updateAuthModalContent() {
     signupForm.style.display = 'none';
     loggedInContent.style.display = 'none';
     
-// Add import account button if not exists
-if (!document.getElementById('import-account-btn')) {
-  const importBtn = document.createElement('button');
-  importBtn.id = 'import-account-btn';
-  importBtn.className = 'auth-button';
-  importBtn.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
-  importBtn.style.marginTop = '10px';
-  importBtn.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
-  importBtn.textContent = 'Import Friend\'s Account';
-  importBtn.onclick = () => document.getElementById('import-file').click();
-  
-  // Add hover effect
-  importBtn.addEventListener('mouseenter', function() {
-    this.style.background = 'linear-gradient(135deg, rgba(120, 70, 180, 1), rgba(100, 50, 150, 1))';
-    this.style.borderColor = 'rgba(150, 100, 200, 0.7)';
-    this.style.transform = 'translateY(-3px)';
-    this.style.boxShadow = '0 12px 30px rgba(100, 50, 150, 0.5), 0 0 40px rgba(100, 50, 150, 0.3)';
-  });
-  
-  importBtn.addEventListener('mouseleave', function() {
-    this.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
-    this.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-    this.style.transform = 'translateY(0)';
-    this.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
-  });
-  
-  loginForm.appendChild(importBtn);
+    if (!document.getElementById('import-account-btn')) {
+      const importBtn = document.createElement('button');
+      importBtn.id = 'import-account-btn';
+      importBtn.className = 'auth-button';
+      importBtn.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
+      importBtn.style.marginTop = '10px';
+      importBtn.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
+      importBtn.textContent = 'Import Friend\'s Account';
+      importBtn.onclick = () => document.getElementById('import-file').click();
+      
+      importBtn.addEventListener('mouseenter', function() {
+        this.style.background = 'linear-gradient(135deg, rgba(120, 70, 180, 1), rgba(100, 50, 150, 1))';
+        this.style.borderColor = 'rgba(150, 100, 200, 0.7)';
+        this.style.transform = 'translateY(-3px)';
+        this.style.boxShadow = '0 12px 30px rgba(100, 50, 150, 0.5), 0 0 40px rgba(100, 50, 150, 0.3)';
+      });
+      
+      importBtn.addEventListener('mouseleave', function() {
+        this.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
+        this.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
+      });
+      
+      loginForm.appendChild(importBtn);
+    }
+  }
 }
 
 function showLoginForm() {
@@ -1732,6 +1732,54 @@ function handleLogin() {
     .catch(e => {
       showAuthError('login-error', 'Connection error. Please try again!');
     });
+}
+
+function handleSignup() {
+  const username = document.getElementById('signup-username').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+  if (!username || !password || !confirmPassword) {
+    showAuthError('signup-error', 'Please fill in all fields!');
+    return;
+  }
+
+  if (username.length < 3) {
+    showAuthError('signup-error', 'Username must be at least 3 characters!');
+    return;
+  }
+
+  if (password.length < 4) {
+    showAuthError('signup-error', 'Password must be at least 4 characters!');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showAuthError('signup-error', 'Passwords do not match!');
+    return;
+  }
+
+  const result = authManager.createAccount(username, password);
+  if (result.success) {
+    authManager.save({ 
+      username, 
+      name: username,
+      avatar: '👤',
+      loggedInAt: new Date().toISOString() 
+    });
+    
+    updateProfileUI({
+      name: username,
+      avatar: '👤'
+    });
+    
+    closeAuthModal();
+    showMessage('Account created and logged in successfully!', 'success');
+    proceedToMainContent();
+    loadUserProgress();
+  } else {
+    showAuthError('signup-error', result.error);
+  }
 }
 
 function handleSignup() {
@@ -2041,7 +2089,7 @@ function saveProfile() {
     }
 
 function clearAllProgress() {
-      if (confirm('Are you sure you want to clear ALL data (progress + profile)? This action cannot be undone.')) {This action cannot be undone.')) {
+      if (confirm('Are you sure you want to clear ALL data (progress + profile)? This action cannot be undone.')) {
     // Clear checkboxes
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
       checkbox.checked = false;
