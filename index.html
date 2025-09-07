@@ -21,33 +21,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Force landscape orientation on mobile devices */
-@media screen and (max-width: 768px) and (orientation: portrait) {
-  body {
-    transform: rotate(90deg);
-    transform-origin: left top;
-    width: 100vh;
-    height: 100vw;
-    overflow-x: hidden;
-    position: absolute;
-    top: 100%;
-    left: 0;
-  }
-  
-  .landscape-warning {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    z-index: 10000;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-  }
-}
     /* Video Background */
     .video-background {
       position: fixed;
@@ -1046,13 +1019,6 @@ body {
     <source src="https://archive.org/download/judas-shinjuku-showdown-arc-full-fight-animation-amv/JUDAS%20%EF%BD%9C%20SHINJUKU%20SHOWDOWN%20ARC%20FULL%20FIGHT%20ANIMATION%20AMV.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-</div>
-
-<!-- Landscape Warning for Mobile Portrait -->
-<div id="landscape-warning" class="landscape-warning" style="display: none;">
-  <h3>📱➡️📱</h3>
-  <p><strong>For the best experience, please rotate your device to landscape mode</strong></p>
-  <p style="font-size: 12px; margin-top: 10px; opacity: 0.8;">This app is optimized for landscape viewing</p>
 </div>
 
   <!-- Background Audio -->
@@ -2275,8 +2241,6 @@ function clearAllProgress() {
 function initializeApp() {
   // Check orientation and show warning if needed
   checkOrientation();
-  window.addEventListener('orientationchange', checkOrientation);
-  window.addEventListener('resize', checkOrientation);
   
   // Load and display profile
   const profileData = profileManager.load();
@@ -2309,17 +2273,8 @@ function initializeApp() {
 }
 
 function checkOrientation() {
-  const isMobile = window.innerWidth <= 768;
-  const isPortrait = window.innerHeight > window.innerWidth;
-  const warning = document.getElementById('landscape-warning');
-  
-  if (isMobile && isPortrait) {
-    warning.style.display = 'block';
-  } else {
-    warning.style.display = 'none';
-  }
+  // Function disabled for mobile compatibility
 }
-
     // Start the app when page loads
     document.addEventListener('DOMContentLoaded', initializeApp);
   </script>
