@@ -1691,6 +1691,7 @@ function handleLogin() {
         showMessage('Login successful!', 'success');
         proceedToMainContent();
         loadUserProgress();
+loadFromGoogleSheets(); // Add this line
       } else {
         showAuthError('login-error', result.error);
       }
@@ -1929,6 +1930,7 @@ function saveProfile() {
 
   const profileData = { name, avatar };
   profileManager.save(profileData);
+syncToGoogleSheets(); // Add this line
   
   // Update UI
   updateProfileUI(profileData);
@@ -2052,6 +2054,7 @@ function saveProfile() {
       });
 
       progressStorage.save(checkboxStates);
+syncToGoogleSheets(); // Add this line
     }
 
 function clearAllProgress() {
@@ -2277,6 +2280,154 @@ function checkOrientation() {
 }
     // Start the app when page loads
     document.addEventListener('DOMContentLoaded', initializeApp);
+// Google Sheets Configuration
+const SHEETS_CONFIG = {
+  apiKey: 'AIzaSyBdZSr3xDyrKP6blzaCtZpwJ9mDoZXmGD4', // You'll get this from Google
+  sheetId: '1Wqb_QykMBjoYzaeHov9O9Ewbc_5gsEhhQSv5OUAlSrE', // You'll get this from your sheet URL
+  range: 'Sheet1!A:F' // Covers columns A to F
+};
+
+// Sync to Google Sheets
+async function syncToGoogleSheets() {
+  try {
+    const currentUser = authManager.load();
+    if (!currentUser) return;
+    
+    const progressData = progressStorage.load() || {};
+    const profileData = profileManager.load() || {};
+    
+    const userData = {
+      username: currentUser.username,
+      password: getStoredPassword(currentUser.username),
+      progress: JSON.stringify(progressData),
+      profilePic: profileData.avatar || '',
+      userId: currentUser.username,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    // Upload to Google Sheets
+    await uploadToSheet(userData);
+    console.log('Synced to Google Sheets successfully');
+  } catch (e) {
+    console.error('Sync failed:', e);
+  }
+}
+
+// Load from Google Sheets
+async function loadFromGoogleSheets() {
+  try {
+    const currentUser = authManager.load();
+    if (!currentUser) return;
+    
+    const cloudData = await downloadFromSheet(currentUser.username);
+    if (cloudData) {
+      // Update local storage with cloud data
+      if (cloudData.progress) {
+        progressStorage.save(JSON.parse(cloudData.progress));
+        loadUserProgress(); // Refresh UI
+      }
+      if (cloudData.profilePic) {
+        const profile = profileManager.load();
+        profile.avatar = cloudData.profilePic;
+        profileManager.save(profile);
+        updateProfileUI(profile);
+      }
+      console.log('Loaded from Google Sheets successfully');
+    }
+  } catch (e) {
+    console.error('Load failed:', e);
+  }
+}
+
+// Helper functions
+function getStoredPassword(username) {
+  const users = authManager.getAllUsers();
+  const user = users.find(u => u.userId === username);
+  return user ? user.password : '';
+}
+
+async function uploadToSheet(userData) {
+  try {
+    // First, get existing data to check if user exists
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/${SHEETS_CONFIG.range}?key=${SHEETS_CONFIG.apiKey}`);
+    const data = await response.json();
+    
+    const values = data.values || [];
+    const headers = values[0] || [];
+    const rows = values.slice(1);
+    
+    // Find existing user row
+    let userRowIndex = -1;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i][0] === userData.username) {
+        userRowIndex = i + 2; // +2 because sheets are 1-indexed and we skip header
+        break;
+      }
+    }
+    
+    const newRow = [
+      userData.username,
+      userData.password,
+      userData.progress,
+      userData.profilePic,
+      userData.userId,
+      userData.lastUpdated
+    ];
+    
+    let updateUrl;
+    if (userRowIndex > -1) {
+      // Update existing row
+      updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/Sheet1!A${userRowIndex}:F${userRowIndex}?valueInputOption=RAW&key=${SHEETS_CONFIG.apiKey}`;
+    } else {
+      // Append new row
+      updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/Sheet1!A:F:append?valueInputOption=RAW&key=${SHEETS_CONFIG.apiKey}`;
+    }
+    
+    await fetch(updateUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        values: [newRow]
+      })
+    });
+    
+    console.log('Data uploaded to Google Sheets');
+  } catch (e) {
+    console.error('Upload error:', e);
+  }
+}
+async function downloadFromSheet(username) {
+  try {
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/${SHEETS_CONFIG.range}?key=${SHEETS_CONFIG.apiKey}`);
+    const data = await response.json();
+    
+    const values = data.values || [];
+    const headers = values[0] || [];
+    const rows = values.slice(1);
+    
+    // Find user's row
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i][0] === username) {
+        return {
+          username: rows[i][0],
+          password: rows[i][1],
+          progress: rows[i][2],
+          profilePic: rows[i][3],
+          userId: rows[i][4],
+          lastUpdated: rows[i][5]
+        };
+      }
+    }
+    return null;
+  } catch (e) {
+    console.error('Download error:', e);
+    return null;
+  }
+}
+// Auto-sync every 30 seconds
+setInterval(syncToGoogleSheets, 30000);
   </script>
 </body>
 </html>
