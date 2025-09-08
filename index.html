@@ -1691,7 +1691,6 @@ function handleLogin() {
         showMessage('Login successful!', 'success');
         proceedToMainContent();
         loadUserProgress();
-loadFromGoogleSheets(); // Add this line
       } else {
         showAuthError('login-error', result.error);
       }
@@ -1930,7 +1929,6 @@ function saveProfile() {
 
   const profileData = { name, avatar };
   profileManager.save(profileData);
-syncToGoogleSheets(); // Add this line
   
   // Update UI
   updateProfileUI(profileData);
@@ -2054,7 +2052,6 @@ syncToGoogleSheets(); // Add this line
       });
 
       progressStorage.save(checkboxStates);
-syncToGoogleSheets(); // Add this line
     }
 
 function clearAllProgress() {
@@ -2181,7 +2178,6 @@ function clearAllProgress() {
         }
         
         showMessage(`Successfully imported and logged in as ${importData.user.userId}!`, 'success');
-        loadFromGoogleSheets(importData.user.userId);
         closeAuthModal();
         
       } else if (importData.progress) {
@@ -2281,73 +2277,6 @@ function checkOrientation() {
 }
     // Start the app when page loads
     document.addEventListener('DOMContentLoaded', initializeApp);
-
-// Google Sheets Configuration
-const SHEETS_CONFIG = {
-  apiKey: 'AIzaSyBdZSr3xDyrKP6blzaCtZpwJ9mDoZXmGD4', // You'll get this from Google
-  sheetId: '1Wqb_QykMBjoYzaeHov9O9Ewbc_5gsEhhQSv5OUAlSrE', // You'll get this from your sheet URL
-  range: 'Sheet1!A:F' // Covers columns A to F
-};
-
-// Sync to Google Sheets
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwgzTzq_vv03wMkQtZBM1Wi2hUzD_0SrzjV3LMi81Pxg64PhiqBnOAx872ZCyyR7USd/exec";
-
-async function syncToGoogleSheets() {
-  const user = authManager.load();
-  const profile = profileManager.load();
-  const progress = progressStorage.load();
-
-  if (!user) {
-    console.log("No user logged in. Skipping sync.");
-    return;
-  }
-
-  const userData = {
-    username: user.username,
-    password: user.password || "N/A",
-    progress: progress || {},
-    profilePic: profile.avatar || "",
-    userId: user.username,
-    lastUpdated: new Date().toISOString()
-  };
-
-  try {
-    const res = await fetch(WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData)
-    });
-    const text = await res.text();
-    console.log("Sync result:", text);
-  } catch (err) {
-    console.error("Sync failed:", err);
-  }
-}
-
-setInterval(syncToGoogleSheets, 30000);
-async function loadFromGoogleSheets(username) {
-  try {
-    const response = await fetch(`${WEB_APP_URL}?username=${encodeURIComponent(username)}`);
-    const data = await response.json();
-
-    if (data && data.progress) {
-      progressStorage.save(JSON.parse(data.progress));
-      loadUserProgress(); // refresh UI checkboxes
-    }
-
-    if (data && data.profilePic) {
-      const profile = profileManager.load();
-      profile.avatar = data.profilePic;
-      profileManager.save(profile);
-      updateProfileUI(profile);
-    }
-
-    console.log("Loaded from Google Sheets successfully");
-  } catch (err) {
-    console.error("Load failed:", err);
-  }
-}
-
   </script>
 </body>
 </html>
