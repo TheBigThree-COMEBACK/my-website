@@ -1578,15 +1578,6 @@ const progressStorage = {
   }
 };
 
-// Handle Enter Button Click - MISSING FUNCTION FIX
-function handleEnterClick() {
-  if (authManager.isLoggedIn()) {
-    proceedToMainContent();
-  } else {
-    openAuthModal();
-  }
-}
-
 // Authentication functions
 function openAuthModal() {
   const modal = document.getElementById('auth-modal-overlay');
