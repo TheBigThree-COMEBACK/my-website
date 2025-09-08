@@ -2280,6 +2280,7 @@ function checkOrientation() {
 }
     // Start the app when page loads
     document.addEventListener('DOMContentLoaded', initializeApp);
+
 // Google Sheets Configuration
 const SHEETS_CONFIG = {
   apiKey: 'AIzaSyBdZSr3xDyrKP6blzaCtZpwJ9mDoZXmGD4', // You'll get this from Google
@@ -2383,15 +2384,23 @@ async function uploadToSheet(userData) {
       updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/Sheet1!A:F:append?valueInputOption=RAW&key=${SHEETS_CONFIG.apiKey}`;
     }
     
-    await fetch(updateUrl, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        values: [newRow]
-      })
-    });
+ let updateUrl;
+if (userRowIndex > -1) {
+  // Update existing row
+  updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/Sheet1!A${userRowIndex}:F${userRowIndex}?valueInputOption=RAW&key=${SHEETS_CONFIG.apiKey}`;
+} else {
+  // Append new row
+  updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.sheetId}/values/Sheet1!A:F:append?valueInputOption=RAW&key=${SHEETS_CONFIG.apiKey}`;
+}
+
+let method = userRowIndex > -1 ? "PUT" : "POST";
+
+await fetch(updateUrl, {
+  method,
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ values: [newRow] })
+});
+
     
     console.log('Data uploaded to Google Sheets');
   } catch (e) {
