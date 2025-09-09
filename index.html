@@ -1505,7 +1505,7 @@ createAccount: function(username, password) {
         userId: username,
         password: password,
         name: username,
-        avatar: '👤',
+        avatar: null,
         progress: {},
         profile: { name: username, avatar: null },
         createdAt: new Date().toISOString()
@@ -1532,7 +1532,7 @@ createAccount: function(username, password) {
         userId: username,
         password: password,
         name: username,
-        avatar: '👤',
+        avatar: null,
         binId: binId,
         createdAt: new Date().toISOString()
       };
@@ -1550,7 +1550,7 @@ createAccount: function(username, password) {
         userId: username,
         password: password,
         name: username,
-        avatar: '👤',
+        avatar: null,
         binId: null,
         createdAt: new Date().toISOString()
       };
@@ -1865,17 +1865,17 @@ function handleLogin() {
   authManager.validateLogin(username, password)
     .then(result => {
       if (result.success) {
-        authManager.save({ 
-          username: result.userData.userId, 
-          name: result.userData.name,
-          avatar: result.userData.avatar,
-          loggedInAt: new Date().toISOString() 
-        });
-        
-        updateProfileUI({
-          name: result.userData.name,
-          avatar: result.userData.avatar
-        });
+ authManager.save({ 
+  username: result.userData.userId, 
+  name: result.userData.name,
+  avatar: result.userData.avatar === '👤' ? null : result.userData.avatar,
+  loggedInAt: new Date().toISOString() 
+});
+
+updateProfileUI({
+  name: result.userData.name,
+  avatar: result.userData.avatar === '👤' ? null : result.userData.avatar
+});
         
         closeAuthModal();
         showMessage('Login successful!', 'success');
@@ -1918,18 +1918,17 @@ function handleSignup() {
 authManager.createAccount(username, password)
   .then(result => {
     if (result.success) {
-      authManager.save({ 
-        username, 
-        name: username,
-        avatar: '👤',
-        loggedInAt: new Date().toISOString() 
-      });
-      
-      updateProfileUI({
-        name: username,
-        avatar: '👤'
-      });
-      
+authManager.save({ 
+  username, 
+  name: username,
+  avatar: null,
+  loggedInAt: new Date().toISOString() 
+});
+
+updateProfileUI({
+  name: username,
+  avatar: null
+});      
       closeAuthModal();
       showMessage('Account created and logged in successfully!', 'success');
       proceedToMainContent();
@@ -2286,7 +2285,7 @@ function clearAllProgress() {
           userId: importData.user.userId,
           password: importData.user.password,
           name: importData.user.name,
-          avatar: importData.user.avatar,
+          avatar: importData.user.avatar === '👤' ? null : importData.user.avatar,
           importedAt: new Date().toISOString()
         };
         
