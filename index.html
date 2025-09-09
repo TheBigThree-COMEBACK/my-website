@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Force landscape orientation on mobile -->
-<meta name="screen-orientation" content="landscape">
-<meta name="orientation" content="landscape">  <title>Chapter Progress Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="screen-orientation" content="landscape">
+  <meta name="orientation" content="landscape">
+  <title>Chapter Progress Tracker</title>
+  
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       margin: 0;
@@ -1414,171 +1418,240 @@ body {
   <!-- Message Container -->
   <div id="message-container"></div>
 
-  <script>
-    // Authentication Manager
+ <script>
+// Initialize Supabase
+const supabaseUrl = 'https://tmlzmvukworhmrxiozdx.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtbHptdnVrd29yaG1yeGlvemR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MTkyNDYsImV4cCI6MjA3Mjk5NTI0Nn0.acPXLkCDtfTm_0Ed2XA8GOqHc8g1XFTLXPETLLlYkbo'
+const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+
+let currentUser = null;
+
+// Authentication Manager
 const authManager = {
-  save: function(userData) {
+  async createAccount(username, password) {
     try {
-      localStorage.setItem('userAuth', JSON.stringify(userData));
-      console.log('User authentication saved successfully');
-    } catch (e) {
-      console.error('Error saving authentication:', e);
-      showMessage('Error saving user data!', 'error');
-    }
-  },
-  
-  load: function() {
-    try {
-      const data = localStorage.getItem('userAuth');
-      if (data) {
-        return JSON.parse(data);
+      // Check if username already exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .single();
+      
+      if (existingProfile) {
+        return { success: false, error: 'Username already exists!' };
       }
-    } catch (e) {
-      console.error('Error loading authentication:', e);
+
+      // Create auth user with email format
+      const email = `${username}@temp.com`;
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: password
+      });
+
+      if (authError) throw authError;
+
+      // Create profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{
+          id: authData.user.id,
+          username: username,
+          display_name: username,
+          avatar_url: '👤'
+        }]);
+
+      if (profileError) throw profileError;
+
+      return { success: true, user: authData.user };
+    } catch (error) {
+      return { success: false, error: error.message };
     }
-    return null;
   },
 
-  getAllUsers: function() {
+  async validateLogin(username, password) {
     try {
-      const users = localStorage.getItem('registeredUsers');
-      return users ? JSON.parse(users) : [];
-    } catch (e) {
-      console.error('Error loading users:', e);
-      return [];
-    }
-  },
+      // Get user by username
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', username)
+        .single();
 
-  saveAllUsers: function(users) {
-    try {
-      localStorage.setItem('registeredUsers', JSON.stringify(users));
-      console.log('Users saved successfully');
-    } catch (e) {
-      console.error('Error saving users:', e);
-    }
-  },
-
-  createAccount: function(username, password) {
-    const users = this.getAllUsers();
-    const existingUser = users.find(u => u.userId === username);
-    if (existingUser) {
-      return { success: false, error: 'Username already exists!' };
-    }
-    const newUser = {
-      userId: username,
-      password: password,
-      name: username,
-      avatar: '👤',
-      createdAt: new Date().toISOString()
-    };
-    users.push(newUser);
-    this.saveAllUsers(users);
-    return { success: true };
-  },
-
-  validateLogin: function(username, password) {
-    return new Promise((resolve) => {
-      const users = this.getAllUsers();
-      const user = users.find(u => u.userId === username && u.password === password);
-      if (user) {
-        resolve({ 
-          success: true, 
-          userData: {
-            userId: user.userId,
-            name: user.name || user.userId,
-            avatar: user.avatar || '👤'
-          }
-        });
-      } else {
-        resolve({ success: false, error: 'Invalid user ID or password!' });
+      if (!profile) {
+        return { success: false, error: 'User not found!' };
       }
-    });
-  },
 
-  logout: function() {
-    try {
-      localStorage.removeItem('userAuth');
-      console.log('User logged out successfully');
-    } catch (e) {
-      console.error('Error logging out:', e);
+      // Sign in with email format
+      const email = `${username}@temp.com`;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        return { success: false, error: 'Invalid credentials!' };
+      }
+
+      // Get full profile data
+      const { data: fullProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      currentUser = {
+        id: data.user.id,
+        username: fullProfile.username,
+        name: fullProfile.display_name,
+        avatar: fullProfile.avatar_url
+      };
+
+      return { 
+        success: true, 
+        userData: {
+          userId: fullProfile.username,
+          name: fullProfile.display_name,
+          avatar: fullProfile.avatar_url
+        }
+      };
+    } catch (error) {
+      return { success: false, error: 'Login failed!' };
     }
   },
 
-  isLoggedIn: function() {
-    const userData = this.load();
-    return userData && userData.username;
+  async logout() {
+    await supabase.auth.signOut();
+    currentUser = null;
+  },
+
+  isLoggedIn() {
+    return currentUser !== null;
+  },
+
+  getCurrentUser() {
+    return currentUser;
   }
 };
 
 // Profile management
 const profileManager = {
-  save: function(profileData) {
+  async save(profileData) {
+    if (!currentUser) return;
+    
     try {
-      localStorage.setItem('userProfile', JSON.stringify(profileData));
-      console.log('Profile saved successfully');
-    } catch (e) {
-      console.error('Error saving profile:', e);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          display_name: profileData.name,
+          avatar_url: profileData.avatar
+        })
+        .eq('id', currentUser.id);
+
+      if (error) throw error;
+      
+      // Update current user data
+      currentUser.name = profileData.name;
+      currentUser.avatar = profileData.avatar;
+      
+    } catch (error) {
       showMessage('Error saving profile!', 'error');
     }
   },
   
-  load: function() {
-    try {
-      const data = localStorage.getItem('userProfile');
-      if (data) {
-        return JSON.parse(data);
-      }
-    } catch (e) {
-      console.error('Error loading profile:', e);
+  load() {
+    if (!currentUser) {
+      return { name: 'Guest User', avatar: null };
     }
-    return { name: 'Guest User', avatar: null };
+    return { 
+      name: currentUser.name || currentUser.username, 
+      avatar: currentUser.avatar 
+    };
   }
 };
 
-// Progress storage using localStorage
+// Progress storage using Supabase
 const progressStorage = {
-  save: function(data) {
+  async save(data) {
+    if (!currentUser) return;
+    
     try {
-      const currentUser = authManager.load();
-      const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
-      localStorage.setItem(key, JSON.stringify(data));
-      console.log('Progress saved to localStorage successfully');
-    } catch (e) {
-      console.error('Error saving progress to localStorage:', e);
+      // Delete existing progress
+      await supabase
+        .from('user_progress')
+        .delete()
+        .eq('user_id', currentUser.id);
+
+      // Insert new progress
+      const progressArray = [];
+      Object.keys(data).forEach(key => {
+        if (data[key]) {
+          const parts = key.split('_');
+          const subject = parts[0];
+          const chapterIndex = parseInt(parts[2]);
+          
+          progressArray.push({
+            user_id: currentUser.id,
+            subject: subject,
+            chapter_index: chapterIndex,
+            completed: true
+          });
+        }
+      });
+
+      if (progressArray.length > 0) {
+        const { error } = await supabase
+          .from('user_progress')
+          .insert(progressArray);
+
+        if (error) throw error;
+      }
+
+    } catch (error) {
       showMessage('Error saving progress!', 'error');
     }
   },
   
-  load: function() {
+  async load() {
+    if (!currentUser) return null;
+    
     try {
-      const currentUser = authManager.load();
-      const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
-      const data = localStorage.getItem(key);
-      if (data) {
-        console.log('Progress loaded from localStorage successfully');
-        return JSON.parse(data);
-      }
-    } catch (e) {
-      console.error('Error loading progress from localStorage:', e);
+      const { data, error } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', currentUser.id);
+
+      if (error) throw error;
+
+      const progressData = {};
+      data.forEach(item => {
+        const key = `${item.subject}_chapter_${item.chapter_index}`;
+        progressData[key] = item.completed;
+      });
+
+      return progressData;
+    } catch (error) {
       showMessage('Error loading progress!', 'error');
+      return null;
     }
-    return null;
   },
   
-  clear: function() {
+  async clear() {
+    if (!currentUser) return;
+    
     try {
-      const currentUser = authManager.load();
-      const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
-      localStorage.removeItem(key);
-      console.log('Progress cleared from localStorage');
-    } catch (e) {
-      console.error('Error clearing progress from localStorage:', e);
+      const { error } = await supabase
+        .from('user_progress')
+        .delete()
+        .eq('user_id', currentUser.id);
+
+      if (error) throw error;
+    } catch (error) {
       showMessage('Error clearing progress!', 'error');
     }
   }
 };
 
-// Handle Enter Button Click - MISSING FUNCTION FIX
+// Handle Enter Button Click
 function handleEnterClick() {
   if (authManager.isLoggedIn()) {
     proceedToMainContent();
@@ -1610,39 +1683,11 @@ function updateAuthModalContent() {
     signupForm.style.display = 'none';
     loggedInContent.style.display = 'block';
     
-    const userData = authManager.load();
-    document.getElementById('current-username').textContent = userData.username;
+    document.getElementById('current-username').textContent = currentUser.username;
   } else {
     loginForm.style.display = 'block';
     signupForm.style.display = 'none';
     loggedInContent.style.display = 'none';
-    
-    if (!document.getElementById('import-account-btn')) {
-      const importBtn = document.createElement('button');
-      importBtn.id = 'import-account-btn';
-      importBtn.className = 'auth-button';
-      importBtn.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
-      importBtn.style.marginTop = '10px';
-      importBtn.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
-      importBtn.textContent = 'Import Friend\'s Account';
-      importBtn.onclick = () => document.getElementById('import-file').click();
-      
-      importBtn.addEventListener('mouseenter', function() {
-        this.style.background = 'linear-gradient(135deg, rgba(120, 70, 180, 1), rgba(100, 50, 150, 1))';
-        this.style.borderColor = 'rgba(150, 100, 200, 0.7)';
-        this.style.transform = 'translateY(-3px)';
-        this.style.boxShadow = '0 12px 30px rgba(100, 50, 150, 0.5), 0 0 40px rgba(100, 50, 150, 0.3)';
-      });
-      
-      importBtn.addEventListener('mouseleave', function() {
-        this.style.background = 'linear-gradient(135deg, rgba(100, 50, 150, 0.8), rgba(80, 30, 120, 0.9))';
-        this.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-        this.style.transform = 'translateY(0)';
-        this.style.boxShadow = '0 8px 25px rgba(100, 50, 150, 0.3)';
-      });
-      
-      loginForm.appendChild(importBtn);
-    }
   }
 }
 
@@ -1663,7 +1708,7 @@ function clearAuthErrors() {
   document.getElementById('signup-error').style.display = 'none';
 }
 
-function handleLogin() {
+async function handleLogin() {
   const username = document.getElementById('login-username').value.trim();
   const password = document.getElementById('login-password').value;
 
@@ -1672,135 +1717,83 @@ function handleLogin() {
     return;
   }
 
-  authManager.validateLogin(username, password)
-    .then(result => {
-      if (result.success) {
-        authManager.save({ 
-          username: result.userData.userId, 
-          name: result.userData.name,
-          avatar: result.userData.avatar,
-          loggedInAt: new Date().toISOString() 
-        });
-        
+  try {
+    const result = await authManager.validateLogin(username, password);
+    
+    if (result.success) {
+      updateProfileUI({
+        name: result.userData.name,
+        avatar: result.userData.avatar
+      });
+      
+      closeAuthModal();
+      showMessage('Login successful!', 'success');
+      proceedToMainContent();
+      await loadUserProgress();
+    } else {
+      showAuthError('login-error', result.error);
+    }
+  } catch (e) {
+    showAuthError('login-error', 'Connection error. Please try again!');
+  }
+}
+
+async function handleSignup() {
+  const username = document.getElementById('signup-username').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+  if (!username || !password || !confirmPassword) {
+    showAuthError('signup-error', 'Please fill in all fields!');
+    return;
+  }
+
+  if (username.length < 3) {
+    showAuthError('signup-error', 'Username must be at least 3 characters!');
+    return;
+  }
+
+  if (password.length < 4) {
+    showAuthError('signup-error', 'Password must be at least 4 characters!');
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    showAuthError('signup-error', 'Passwords do not match!');
+    return;
+  }
+
+  try {
+    const result = await authManager.createAccount(username, password);
+    
+    if (result.success) {
+      // Auto-login after signup
+      const loginResult = await authManager.validateLogin(username, password);
+      
+      if (loginResult.success) {
         updateProfileUI({
-          name: result.userData.name,
-          avatar: result.userData.avatar
+          name: loginResult.userData.name,
+          avatar: loginResult.userData.avatar
         });
         
         closeAuthModal();
-        showMessage('Login successful!', 'success');
+        showMessage('Account created and logged in successfully!', 'success');
         proceedToMainContent();
-        loadUserProgress();
-loadFromGoogleSheets(); // Add this line
-      } else {
-        showAuthError('login-error', result.error);
+        await loadUserProgress();
       }
-    })
-    .catch(e => {
-      showAuthError('login-error', 'Connection error. Please try again!');
-    });
-}
-
-function handleSignup() {
-  const username = document.getElementById('signup-username').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const confirmPassword = document.getElementById('signup-confirm-password').value;
-
-  if (!username || !password || !confirmPassword) {
-    showAuthError('signup-error', 'Please fill in all fields!');
-    return;
-  }
-
-  if (username.length < 3) {
-    showAuthError('signup-error', 'Username must be at least 3 characters!');
-    return;
-  }
-
-  if (password.length < 4) {
-    showAuthError('signup-error', 'Password must be at least 4 characters!');
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showAuthError('signup-error', 'Passwords do not match!');
-    return;
-  }
-
-  const result = authManager.createAccount(username, password);
-  if (result.success) {
-    authManager.save({ 
-      username, 
-      name: username,
-      avatar: '👤',
-      loggedInAt: new Date().toISOString() 
-    });
-    
-    updateProfileUI({
-      name: username,
-      avatar: '👤'
-    });
-    
-    closeAuthModal();
-    showMessage('Account created and logged in successfully!', 'success');
-    proceedToMainContent();
-    loadUserProgress();
-  } else {
-    showAuthError('signup-error', result.error);
-  }
-}
-
-function handleSignup() {
-  const username = document.getElementById('signup-username').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const confirmPassword = document.getElementById('signup-confirm-password').value;
-
-  if (!username || !password || !confirmPassword) {
-    showAuthError('signup-error', 'Please fill in all fields!');
-    return;
-  }
-
-  if (username.length < 3) {
-    showAuthError('signup-error', 'Username must be at least 3 characters!');
-    return;
-  }
-
-  if (password.length < 4) {
-    showAuthError('signup-error', 'Password must be at least 4 characters!');
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showAuthError('signup-error', 'Passwords do not match!');
-    return;
-  }
-
-  const result = authManager.createAccount(username, password);
-  if (result.success) {
-    authManager.save({ 
-      username, 
-      name: username,
-      avatar: '👤',
-      loggedInAt: new Date().toISOString() 
-    });
-    
-    updateProfileUI({
-      name: username,
-      avatar: '👤'
-    });
-    
-    closeAuthModal();
-    showMessage('Account created and logged in successfully!', 'success');
-    proceedToMainContent();
-    loadUserProgress();
-  } else {
-    showAuthError('signup-error', result.error);
-  }
-}
-    function showAuthError(elementId, message) {
-      const errorDiv = document.getElementById(elementId);
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
+    } else {
+      showAuthError('signup-error', result.error);
     }
+  } catch (e) {
+    showAuthError('signup-error', 'Error creating account!');
+  }
+}
+
+function showAuthError(elementId, message) {
+  const errorDiv = document.getElementById(elementId);
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+}
 
 function proceedToMainContent() {
   const blurOverlay = document.getElementById('blur-overlay');
@@ -1808,116 +1801,100 @@ function proceedToMainContent() {
   const video = document.getElementById('background-video');
   const audio = document.getElementById('background-audio');
   
-  // Hide the overlay
   blurOverlay.classList.add('hidden');
-  
-  // Show main content
   mainContent.classList.add('unblurred');
   
-  // Start video
   if (video) {
     video.play().catch(e => console.log('Video play failed:', e));
   }
   
-  // Start audio with higher volume
   if (audio) {
     audio.volume = 0.9;
     audio.play().then(() => {
       console.log('Audio started successfully');
     }).catch(e => {
       console.log('Audio play failed:', e);
-      // Fallback: try to play audio when user interacts
       document.addEventListener('click', function playAudio() {
         audio.play();
         document.removeEventListener('click', playAudio);
       }, { once: true });
     });
   }
-  
-  loadUserProgress();
 }
-    function handleLogout() {
-      authManager.logout();
-      updateAuthModalContent();
-      showMessage('Logged out successfully!', 'success');
-      closeAuthModal();
-      
-      // Go back to entrance screen
-      document.getElementById('blur-overlay').classList.remove('hidden');
-      document.getElementById('main-content').classList.remove('unblurred');
-      
-      // Stop video and audio
-      const video = document.getElementById('background-video');
-      const audio = document.getElementById('background-audio');
-      if (video) video.pause();
-      if (audio) audio.pause();
-      
-      // Reset progress display since user data is now per-user
-      loadUserProgress();
-    }
 
-    function loadUserProgress() {
-      const savedProgress = progressStorage.load();
-      if (savedProgress) {
-        // Restore checkbox states
-        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
-          const subject = checkbox.getAttribute('data-subject');
-          const key = subject + '_chapter_' + index;
-          checkbox.checked = savedProgress[key] || false;
-        });
-        updateProgress();
-      } else {
-        // Clear all checkboxes for new user
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-          checkbox.checked = false;
-        });
-        updateProgress();
-      }
-    }
+async function handleLogout() {
+  await authManager.logout();
+  updateAuthModalContent();
+  showMessage('Logged out successfully!', 'success');
+  closeAuthModal();
+  
+  document.getElementById('blur-overlay').classList.remove('hidden');
+  document.getElementById('main-content').classList.remove('unblurred');
+  
+  const video = document.getElementById('background-video');
+  const audio = document.getElementById('background-audio');
+  if (video) video.pause();
+  if (audio) audio.pause();
+  
+  await loadUserProgress();
+}
 
-  // This function is now defined above - remove this duplicate
+async function loadUserProgress() {
+  const savedProgress = await progressStorage.load();
+  if (savedProgress) {
+    document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
+      const subject = checkbox.getAttribute('data-subject');
+      const key = subject + '_chapter_' + index;
+      checkbox.checked = savedProgress[key] || false;
+    });
+    updateProgress();
+  } else {
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      checkbox.checked = false;
+    });
+    updateProgress();
+  }
+}
 
-    // Profile functions
-    function openProfileModal() {
-      const modal = document.getElementById('profile-modal-overlay');
-      const profileData = profileManager.load();
-      
-      // Set current values
-      document.getElementById('profile-name-input').value = profileData.name;
-      
-      const modalAvatar = document.getElementById('modal-avatar-preview');
-      if (profileData.avatar) {
-        modalAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
-      } else {
-        modalAvatar.innerHTML = '👤';
-      }
-      
-      modal.classList.add('active');
-    }
+// Profile functions
+function openProfileModal() {
+  const modal = document.getElementById('profile-modal-overlay');
+  const profileData = profileManager.load();
+  
+  document.getElementById('profile-name-input').value = profileData.name;
+  
+  const modalAvatar = document.getElementById('modal-avatar-preview');
+  if (profileData.avatar && profileData.avatar !== '👤') {
+    modalAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
+  } else {
+    modalAvatar.innerHTML = '👤';
+  }
+  
+  modal.classList.add('active');
+}
 
-    function closeProfileModal() {
-      document.getElementById('profile-modal-overlay').classList.remove('active');
-    }
+function closeProfileModal() {
+  document.getElementById('profile-modal-overlay').classList.remove('active');
+}
 
-    function handleAvatarUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      // Check file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        showMessage('Image size should be less than 5MB!', 'error');
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const modalAvatar = document.getElementById('modal-avatar-preview');
-        modalAvatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
-      };
-      reader.readAsDataURL(file);
-    }
+function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  if (file.size > 5 * 1024 * 1024) {
+    showMessage('Image size should be less than 5MB!', 'error');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const modalAvatar = document.getElementById('modal-avatar-preview');
+    modalAvatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+  };
+  reader.readAsDataURL(file);
+}
 
-function saveProfile() {
+async function saveProfile() {
   const name = document.getElementById('profile-name-input').value.trim();
   if (!name) {
     showMessage('Please enter a name!', 'error');
@@ -1926,179 +1903,148 @@ function saveProfile() {
 
   const modalAvatar = document.getElementById('modal-avatar-preview');
   const imgElement = modalAvatar.querySelector('img');
-  const avatar = imgElement ? imgElement.src : null;
+  const avatar = imgElement ? imgElement.src : '👤';
 
   const profileData = { name, avatar };
-  profileManager.save(profileData);
-syncToGoogleSheets(); // Add this line
+  await profileManager.save(profileData);
   
-  // Update UI
   updateProfileUI(profileData);
-  
   closeProfileModal();
+  showMessage('Profile saved successfully!', 'success');
 }
 
-    function updateProfileUI(profileData) {
-      document.getElementById('profile-name').textContent = profileData.name;
-      
-      const profileAvatar = document.getElementById('profile-avatar');
-      if (profileData.avatar) {
-        profileAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
-      } else {
-        profileAvatar.innerHTML = '👤';
-      }
+function updateProfileUI(profileData) {
+  document.getElementById('profile-name').textContent = profileData.name;
+  
+  const profileAvatar = document.getElementById('profile-avatar');
+  if (profileData.avatar && profileData.avatar !== '👤') {
+    profileAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
+  } else {
+    profileAvatar.innerHTML = '👤';
+  }
+}
+
+// Message system
+function showMessage(text, type = 'success') {
+  const container = document.getElementById('message-container');
+  const message = document.createElement('div');
+  message.className = `message ${type}`;
+  message.textContent = text;
+  
+  container.appendChild(message);
+  
+  setTimeout(() => message.classList.add('show'), 10);
+  
+  setTimeout(() => {
+    message.classList.remove('show');
+    setTimeout(() => container.removeChild(message), 300);
+  }, 3000);
+}
+
+// Subject navigation
+function showSubject(subject) {
+  document.querySelectorAll('.subject-section').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  document.getElementById(subject).classList.add('active');
+  event.target.classList.add('active');
+}
+
+async function updateProgress() {
+  const subjectCounts = {
+    mathematics: { total: 10, completed: 0 },
+    science: { total: 7, completed: 0 },
+    english: { total: 19, completed: 0 },
+    hindi: { total: 11, completed: 0 },
+    sst: { total: 14, completed: 0 }
+  };
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    const subject = checkbox.getAttribute('data-subject');
+    if (checkbox.checked && subjectCounts[subject]) {
+      subjectCounts[subject].completed++;
     }
+  });
 
-    // Message system
-    function showMessage(text, type = 'success') {
-      const container = document.getElementById('message-container');
-      const message = document.createElement('div');
-      message.className = `message ${type}`;
-      message.textContent = text;
-      
-      container.appendChild(message);
-      
-      // Trigger show animation
-      setTimeout(() => message.classList.add('show'), 10);
-      
-      // Auto remove after 3 seconds
-      setTimeout(() => {
-        message.classList.remove('show');
-        setTimeout(() => container.removeChild(message), 300);
-      }, 3000);
-    }
+  let totalChapters = 0;
+  let completedChapters = 0;
+  
+  Object.values(subjectCounts).forEach(subject => {
+    totalChapters += subject.total;
+    completedChapters += subject.completed;
+  });
 
-    // Subject navigation
-    function showSubject(subject) {
-      // Hide all sections
-      document.querySelectorAll('.subject-section').forEach(section => {
-        section.classList.remove('active');
-      });
-      
-      // Remove active from all buttons
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      // Show selected section
-      document.getElementById(subject).classList.add('active');
-      
-      // Add active to clicked button
-      event.target.classList.add('active');
-    }
+  const overallProgress = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
 
-    function updateProgress() {
-      console.log('updateProgress() called');
-      
-      // Count completed chapters for each subject
-      const subjectCounts = {
-        mathematics: { total: 10, completed: 0 },
-        science: { total: 7, completed: 0 },
-        english: { total: 19, completed: 0 },
-        hindi: { total: 11, completed: 0 },
-        sst: { total: 14, completed: 0 }
-      };
+  const overallBar = document.getElementById('overall-progress-bar');
+  const overallText = document.getElementById('overall-progress-text');
+  
+  if (overallBar) overallBar.style.width = overallProgress + '%';
+  if (overallText) overallText.textContent = Math.round(overallProgress) + '% Completed (' + completedChapters + '/' + totalChapters + ')';
 
-      // Count checked boxes for each subject
-      document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        const subject = checkbox.getAttribute('data-subject');
-        if (checkbox.checked && subjectCounts[subject]) {
-          subjectCounts[subject].completed++;
-        }
-      });
+  Object.keys(subjectCounts).forEach(subject => {
+    const subjectProgress = subjectCounts[subject].total > 0 ? (subjectCounts[subject].completed / subjectCounts[subject].total) * 100 : 0;
+    
+    const subjectIdMap = {
+      'mathematics': 'math',
+      'science': 'science', 
+      'english': 'english',
+      'hindi': 'hindi',
+      'sst': 'sst'
+    };
+    
+    const htmlId = subjectIdMap[subject] || subject;
+    const progressElement = document.getElementById(htmlId + '-progress');
+    const textElement = document.getElementById(htmlId + '-text');
+    
+    if (progressElement) progressElement.style.width = subjectProgress + '%';
+    if (textElement) textElement.textContent = subjectCounts[subject].completed + '/' + subjectCounts[subject].total;
+  });
 
-      // Calculate overall progress
-      let totalChapters = 0;
-      let completedChapters = 0;
-      
-      Object.values(subjectCounts).forEach(subject => {
-        totalChapters += subject.total;
-        completedChapters += subject.completed;
-      });
+  const checkboxStates = {};
+  document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
+    const subject = checkbox.getAttribute('data-subject');
+    const key = subject + '_chapter_' + index;
+    checkboxStates[key] = checkbox.checked;
+  });
 
-      const overallProgress = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
+  await progressStorage.save(checkboxStates);
+}
 
-      // Update overall progress bar
-      const overallBar = document.getElementById('overall-progress-bar');
-      const overallText = document.getElementById('overall-progress-text');
-      
-      if (overallBar) overallBar.style.width = overallProgress + '%';
-      if (overallText) overallText.textContent = Math.round(overallProgress) + '% Completed (' + completedChapters + '/' + totalChapters + ')';
-
-      // Update individual subject progress
-      Object.keys(subjectCounts).forEach(subject => {
-        const subjectProgress = subjectCounts[subject].total > 0 ? (subjectCounts[subject].completed / subjectCounts[subject].total) * 100 : 0;
-        
-        const subjectIdMap = {
-          'mathematics': 'math',
-          'science': 'science', 
-          'english': 'english',
-          'hindi': 'hindi',
-          'sst': 'sst'
-        };
-        
-        const htmlId = subjectIdMap[subject] || subject;
-        const progressElement = document.getElementById(htmlId + '-progress');
-        const textElement = document.getElementById(htmlId + '-text');
-        
-        if (progressElement) progressElement.style.width = subjectProgress + '%';
-        if (textElement) textElement.textContent = subjectCounts[subject].completed + '/' + subjectCounts[subject].total;
-      });
-
-      // Save progress using improved key system
-      const checkboxStates = {};
-      document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
-        const subject = checkbox.getAttribute('data-subject');
-        const key = subject + '_chapter_' + index;
-        checkboxStates[key] = checkbox.checked;
-      });
-
-      progressStorage.save(checkboxStates);
-syncToGoogleSheets(); // Add this line
-    }
-
-function clearAllProgress() {
-      if (confirm('Are you sure you want to clear ALL data (progress + profile)? This action cannot be undone.')) {
-    // Clear checkboxes
+async function clearAllProgress() {
+  if (confirm('Are you sure you want to clear ALL progress? This action cannot be undone.')) {
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
       checkbox.checked = false;
     });
     
-    // Clear from storage
-    progressStorage.clear();
-    
-    // Reset profile to default
-    profileManager.save({ name: 'Guest User', avatar: null });
-    updateProfileUI({ name: 'Guest User', avatar: null });
-    
+    await progressStorage.clear();
     updateProgress();
-    showMessage('All data cleared successfully!', 'success');
+    showMessage('All progress cleared successfully!', 'success');
   }
 }
 
-     function exportProgress() {
+async function exportProgress() {
   try {
-    const currentUser = authManager.load();
     if (!currentUser) {
       showMessage('Please login first to export data!', 'error');
       return;
     }
     
-    const progressData = progressStorage.load() || {};
+    const progressData = await progressStorage.load() || {};
     const profileData = profileManager.load() || {};
     
-    // Get user credentials from registered users
-    const allUsers = authManager.getAllUsers();
-    const userCredentials = allUsers.find(u => u.userId === currentUser.username);
-    
     const exportData = {
-      exportType: 'complete_user_data',
+      exportType: 'supabase_user_data',
       exportDate: new Date().toISOString(),
       user: {
-        userId: currentUser.username,
-        password: userCredentials ? userCredentials.password : null,
-        name: currentUser.name || currentUser.username,
-        avatar: currentUser.avatar || '👤'
+        username: currentUser.username,
+        name: currentUser.name,
+        avatar: currentUser.avatar
       },
       progress: progressData,
       profile: profileData
@@ -2109,245 +2055,98 @@ function clearAllProgress() {
     
     const link = document.createElement('a');
     link.href = URL.createObjectURL(dataBlob);
-    link.download = `complete-user-data-${exportData.user.userId}-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `progress-data-${exportData.user.username}-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     
-    showMessage('Complete user data exported successfully!', 'success');
+    showMessage('Data exported successfully!', 'success');
   } catch (e) {
-    console.error('Export error:', e);
-    showMessage('Error exporting user data!', 'error');
+    showMessage('Error exporting data!', 'error');
   }
 }
 
-    function importProgress(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const importData = JSON.parse(e.target.result);
-      
-      // Check if it's the new complete user data format
-      if (importData.exportType === 'complete_user_data' && importData.user) {
-        // Import user account
-        const allUsers = authManager.getAllUsers();
-        const existingUserIndex = allUsers.findIndex(u => u.userId === importData.user.userId);
-        
-        const userData = {
-          userId: importData.user.userId,
-          password: importData.user.password,
-          name: importData.user.name,
-          avatar: importData.user.avatar,
-          importedAt: new Date().toISOString()
-        };
-        
-        if (existingUserIndex >= 0) {
-          // Update existing user
-          allUsers[existingUserIndex] = userData;
-        } else {
-          // Add new user
-          allUsers.push(userData);
-        }
-        
-        authManager.saveAllUsers(allUsers);
-        
-        // Auto-login as imported user
-        authManager.save({
-          username: importData.user.userId,
-          name: importData.user.name,
-          avatar: importData.user.avatar,
-          loggedInAt: new Date().toISOString()
-        });
-        
-        // Import profile data
-        if (importData.profile) {
-          profileManager.save(importData.profile);
-          updateProfileUI(importData.profile);
-        }
-        
-        // Import progress data
-        if (importData.progress) {
-          progressStorage.save(importData.progress);
-          
-          // Update checkboxes
-          document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
-            const subject = checkbox.getAttribute('data-subject');
-            const key = subject + '_chapter_' + index;
-            checkbox.checked = importData.progress[key] || false;
-          });
-          
-          updateProgress();
-        }
-        
-        showMessage(`Successfully imported and logged in as ${importData.user.userId}!`, 'success');
-        loadFromGoogleSheets(importData.user.userId);
-        closeAuthModal();
-        
-      } else if (importData.progress) {
-        // Handle old format (just progress)
-        progressStorage.save(importData.progress);
-        
-        document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
-          const subject = checkbox.getAttribute('data-subject');
-          const key = subject + '_chapter_' + index;
-          checkbox.checked = importData.progress[key] || false;
-        });
-        
-        updateProgress();
-        showMessage('Progress imported successfully!', 'success');
-      } else {
-        showMessage('Invalid file format!', 'error');
-      }
-    } catch (e) {
-      console.error('Import error:', e);
-      showMessage('Error importing file!', 'error');
-    }
-  };
-  reader.readAsText(file);
-  
+function importProgress(event) {
+  showMessage('Import feature disabled - use login to access any account!', 'error');
   event.target.value = '';
 }
 
-    // Snowfall functions
-    function createSnowfall() {
-      const snowfall = document.createElement('div');
-      snowfall.className = 'snowfall';
-      snowfall.id = 'snowfall';
-      
-      // Create 50 snowflakes
-      for (let i = 0; i < 50; i++) {
-        const snowflake = document.createElement('div');
-        snowflake.className = 'snowflake';
-        snowflake.innerHTML = '❄';
-        
-        // Random position and animation duration
-        snowflake.style.left = Math.random() * 100 + '%';
-        snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        snowflake.style.animationDelay = Math.random() * 2 + 's';
-        snowflake.style.fontSize = (Math.random() * 0.8 + 0.8) + 'em';
-        snowflake.style.opacity = Math.random() * 0.8 + 0.2;
-        
-        snowfall.appendChild(snowflake);
-      }
-      
-      document.body.appendChild(snowfall);
-    }
-
-    function removeSnowfall() {
-      const snowfall = document.getElementById('snowfall');
-      if (snowfall) {
-        snowfall.remove();
-      }
-    }
-
- // Initialize app
-function initializeApp() {
-  // Check orientation and show warning if needed
-  checkOrientation();
+// Snowfall functions
+function createSnowfall() {
+  const snowfall = document.createElement('div');
+  snowfall.className = 'snowfall';
+  snowfall.id = 'snowfall';
   
-  // Load and display profile
+  for (let i = 0; i < 50; i++) {
+    const snowflake = document.createElement('div');
+    snowflake.className = 'snowflake';
+    snowflake.innerHTML = '❄';
+    
+    snowflake.style.left = Math.random() * 100 + '%';
+    snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    snowflake.style.animationDelay = Math.random() * 2 + 's';
+    snowflake.style.fontSize = (Math.random() * 0.8 + 0.8) + 'em';
+    snowflake.style.opacity = Math.random() * 0.8 + 0.2;
+    
+    snowfall.appendChild(snowflake);
+  }
+  
+  document.body.appendChild(snowfall);
+}
+
+function removeSnowfall() {
+  const snowfall = document.getElementById('snowfall');
+  if (snowfall) {
+    snowfall.remove();
+  }
+}
+
+// Initialize app
+async function initializeApp() {
   const profileData = profileManager.load();
   updateProfileUI(profileData);
   
-  // Check if user is logged in and proceed accordingly
-  if (authManager.isLoggedIn()) {
-    // If already logged in, the enter button will skip auth
-    console.log('User already logged in');
-  }
-  
-  // Add event listeners to checkboxes
   document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
     checkbox.addEventListener('change', updateProgress);
   });
   
-  // Close auth modal when clicking outside
   document.getElementById('auth-modal-overlay').addEventListener('click', function(e) {
     if (e.target === this) {
       closeAuthModal();
     }
   });
   
-  // Close profile modal when clicking outside
   document.getElementById('profile-modal-overlay').addEventListener('click', function(e) {
     if (e.target === this) {
       closeProfileModal();
     }
   });
-}
 
-function checkOrientation() {
-  // Function disabled for mobile compatibility
-}
-    // Start the app when page loads
-    document.addEventListener('DOMContentLoaded', initializeApp);
-
-// Google Sheets Configuration
-const SHEETS_CONFIG = {
-  apiKey: 'AIzaSyBdZSr3xDyrKP6blzaCtZpwJ9mDoZXmGD4', // You'll get this from Google
-  sheetId: '1Wqb_QykMBjoYzaeHov9O9Ewbc_5gsEhhQSv5OUAlSrE', // You'll get this from your sheet URL
-  range: 'Sheet1!A:F' // Covers columns A to F
-};
-
-// Sync to Google Sheets
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwgzTzq_vv03wMkQtZBM1Wi2hUzD_0SrzjV3LMi81Pxg64PhiqBnOAx872ZCyyR7USd/exec";
-
-async function syncToGoogleSheets() {
-  const user = authManager.load();
-  const profile = profileManager.load();
-  const progress = progressStorage.load();
-
-  if (!user) {
-    console.log("No user logged in. Skipping sync.");
-    return;
-  }
-
-  const userData = {
-    username: user.username,
-    password: user.password || "N/A",
-    progress: progress || {},
-    profilePic: profile.avatar || "",
-    userId: user.username,
-    lastUpdated: new Date().toISOString()
-  };
-
-  try {
-    const res = await fetch(WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData)
-    });
-    const text = await res.text();
-    console.log("Sync result:", text);
-  } catch (err) {
-    console.error("Sync failed:", err);
-  }
-}
-
-setInterval(syncToGoogleSheets, 30000);
-async function loadFromGoogleSheets(username) {
-  try {
-    const response = await fetch(`${WEB_APP_URL}?username=${encodeURIComponent(username)}`);
-    const data = await response.json();
-
-    if (data && data.progress) {
-      progressStorage.save(JSON.parse(data.progress));
-      loadUserProgress(); // refresh UI checkboxes
+  // Check if user is already logged in (from Supabase session)
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    // Get profile data
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (profile) {
+      currentUser = {
+        id: user.id,
+        username: profile.username,
+        name: profile.display_name,
+        avatar: profile.avatar_url
+      };
+      
+      updateProfileUI({
+        name: profile.display_name,
+        avatar: profile.avatar_url
+      });
     }
-
-    if (data && data.profilePic) {
-      const profile = profileManager.load();
-      profile.avatar = data.profilePic;
-      profileManager.save(profile);
-      updateProfileUI(profile);
-    }
-
-    console.log("Loaded from Google Sheets successfully");
-  } catch (err) {
-    console.error("Load failed:", err);
   }
 }
 
-  </script>
+document.addEventListener('DOMContentLoaded', initializeApp);
+</script>
 </body>
 </html>
