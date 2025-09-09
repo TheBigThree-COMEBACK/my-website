@@ -2046,14 +2046,19 @@ if (profileData.avatar && profileData.avatar !== '👤' && profileData.avatar.st
       document.getElementById('profile-modal-overlay').classList.remove('active');
     }
 
- function saveProfile() {
+function saveProfile() {
   console.log('saveProfile() called');
   
   const name = document.getElementById('profile-name-input').value.trim();
   if (!name) {
     showMessage('Please enter a name!', 'error');
     return;
- 
+  }
+
+  const modalAvatar = document.getElementById('modal-avatar-preview');
+  const imgElement = modalAvatar.querySelector('img');
+  const avatar = imgElement && imgElement.src.startsWith('data:') ? imgElement.src : null;
+
   const profileData = { name, avatar };
   profileManager.save(profileData);
   
