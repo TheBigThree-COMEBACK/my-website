@@ -1459,12 +1459,13 @@ const authManager = {
     }
   },
 
-  createAccount: function(username, password) {
-    return new Promise(async (resolve, reject) => {
+createAccount: function(username, password) {
+  return new Promise(async (resolve, reject) => {
     const users = this.getAllUsers();
     const existingUser = users.find(u => u.userId === username);
     if (existingUser) {
-      return { success: false, error: 'Username already exists!' };
+      resolve({ success: false, error: 'Username already exists!' });
+      return;
     }
 
     try {
@@ -1509,7 +1510,7 @@ const authManager = {
       this.saveAllUsers(users);
       
       showMessage('Account created with cloud sync!', 'success');
-resolve({ success: true });
+      resolve({ success: true });
     } catch (e) {
       console.error('Error creating cloud account:', e);
       
@@ -1528,31 +1529,45 @@ resolve({ success: true });
       showMessage('Account created (local only)', 'error');
       resolve({ success: true });
     }
-    });
-  },
+  });
+},
 
-  validateLogin: async function(username, password) {
-    try {
-      const users = this.getAllUsers();
-      const localUser = users.find(u => u.userId === username && u.password === password);
-      
-      if (localUser) {
-        return { 
-          success: true, 
-          userData: {
-            userId: localUser.userId,
-            name: localUser.name || localUser.userId,
-            avatar: localUser.avatar || '👤',
-            binId: localUser.binId
+validateLogin: async function(username, password) {
+  try {
+    const users = this.getAllUsers();
+    const localUser = users.find(u => u.userId === username && u.password === password);
+    
+    if (localUser) {
+      // Try to fetch latest data from cloud if binId exists
+      if (localUser.binId) {
+        try {
+          const response = await fetch(`${JSONBIN_BASE_URL}/b/${localUser.binId}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY }
+          });
+          if (response.ok) {
+            const result = await response.json();
+            console.log('Loaded cloud data for user');
           }
-        };
+        } catch (e) {
+          console.log('Cloud sync failed, using local data');
+        }
       }
-      return { success: false, error: 'Invalid user ID or password!' };
-    } catch (e) {
-      return { success: false, error: 'Login error. Please try again!' };
+      
+      return { 
+        success: true, 
+        userData: {
+          userId: localUser.userId,
+          name: localUser.name || localUser.userId,
+          avatar: localUser.avatar || '👤',
+          binId: localUser.binId
+        }
+      };
     }
-  },
-
+    return { success: false, error: 'Invalid user ID or password!' };
+  } catch (e) {
+    return { success: false, error: 'Login error. Please try again!' };
+  }
+},
   logout: function() {
     try {
       localStorage.removeItem('userAuth');
@@ -1580,26 +1595,44 @@ const progressStorage = {
       }
 
       // Save to cloud
-      const userData = await this.getUserCloudData(currentUser.username);
-      if (userData.binId) {
-        // Update existing bin
-        const response = await fetch(`${JSONBIN_BASE_URL}/b/${userData.binId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Master-Key': JSONBIN_API_KEY
-          },
-          body: JSON.stringify({
-            ...userData.data,
-            progress: data,
-            lastUpdated: new Date().toISOString()
-          })
-        });
+      const users = authManager.getAllUsers();
+      const userRecord = users.find(u => u.userId === currentUser.username);
+      
+      if (userRecord && userRecord.binId) {
+        try {
+          // Get current cloud data first
+          const response = await fetch(`${JSONBIN_BASE_URL}/b/${userRecord.binId}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY }
+          });
+          
+          let cloudData = {};
+          if (response.ok) {
+            const result = await response.json();
+            cloudData = result.record;
+          }
 
-        if (response.ok) {
-          console.log('Progress saved to cloud successfully');
-        } else {
-          throw new Error('Failed to save to cloud');
+          // Update with new progress
+          cloudData.progress = data;
+          cloudData.lastUpdated = new Date().toISOString();
+
+          // Save back to cloud
+          const updateResponse = await fetch(`${JSONBIN_BASE_URL}/b/${userRecord.binId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': JSONBIN_API_KEY
+            },
+            body: JSON.stringify(cloudData)
+          });
+
+          if (updateResponse.ok) {
+            console.log('Progress saved to cloud successfully');
+          } else {
+            throw new Error('Failed to save to cloud');
+          }
+        } catch (e) {
+          console.error('Cloud save failed:', e);
+          showMessage('Saved locally (cloud sync failed)', 'error');
         }
       }
 
@@ -1624,10 +1657,25 @@ const progressStorage = {
       }
 
       // Try to load from cloud first
-      const userData = await this.getUserCloudData(currentUser.username);
-      if (userData.binId && userData.data.progress) {
-        console.log('Progress loaded from cloud successfully');
-        return userData.data.progress;
+      const users = authManager.getAllUsers();
+      const userRecord = users.find(u => u.userId === currentUser.username);
+      
+      if (userRecord && userRecord.binId) {
+        try {
+          const response = await fetch(`${JSONBIN_BASE_URL}/b/${userRecord.binId}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY }
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            if (result.record && result.record.progress) {
+              console.log('Progress loaded from cloud successfully');
+              return result.record.progress;
+            }
+          }
+        } catch (e) {
+          console.error('Cloud load failed:', e);
+        }
       }
 
       // Fallback to local storage
@@ -1640,33 +1688,6 @@ const progressStorage = {
       const key = currentUser ? `chapterProgress_${currentUser.username}` : 'chapterProgress_guest';
       const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : null;
-    }
-  },
-
-  async getUserCloudData(username) {
-    try {
-      // Check if user already has a bin ID stored
-      const users = authManager.getAllUsers();
-      const user = users.find(u => u.userId === username);
-      
-      if (user && user.binId) {
-        // Fetch existing data
-        const response = await fetch(`${JSONBIN_BASE_URL}/b/${user.binId}/latest`, {
-          headers: {
-            'X-Master-Key': JSONBIN_API_KEY
-          }
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          return { binId: user.binId, data: result.record };
-        }
-      }
-
-      return { binId: null, data: {} };
-    } catch (e) {
-      console.error('Error getting user cloud data:', e);
-      return { binId: null, data: {} };
     }
   },
 
@@ -1863,30 +1884,29 @@ function handleSignup() {
     return;
   }
 
-  authManager.createAccount(username, password)
-    .then(result => {
+authManager.createAccount(username, password)
+  .then(result => {
     if (result.success) {
-  if (result.success) {
-    authManager.save({ 
-      username, 
-      name: username,
-      avatar: '👤',
-      loggedInAt: new Date().toISOString() 
-    });
-    
-    updateProfileUI({
-      name: username,
-      avatar: '👤'
-    });
-    
-    closeAuthModal();
-    showMessage('Account created and logged in successfully!', 'success');
-    proceedToMainContent();
- loadUserProgress();
-  } else {
-    showAuthError('signup-error', result.error);
-  }
-    })
+      authManager.save({ 
+        username, 
+        name: username,
+        avatar: '👤',
+        loggedInAt: new Date().toISOString() 
+      });
+      
+      updateProfileUI({
+        name: username,
+        avatar: '👤'
+      });
+      
+      closeAuthModal();
+      showMessage('Account created and logged in successfully!', 'success');
+      proceedToMainContent();
+      loadUserProgress();
+    } else {
+      showAuthError('signup-error', result.error);
+    }
+  })
     .catch(e => {
       console.error('Signup error:', e);
       showAuthError('signup-error', 'Error creating account. Please try again!');
@@ -1953,8 +1973,8 @@ function proceedToMainContent() {
       loadUserProgress();
     }
 
-    function loadUserProgress() {
-      const savedProgress = progressStorage.load();
+    async function loadUserProgress() {
+      const savedProgress = await progressStorage.load();
       if (savedProgress) {
         // Restore checkbox states
         document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
@@ -2083,7 +2103,7 @@ function saveProfile() {
       event.target.classList.add('active');
     }
 
-    function updateProgress() {
+    async function updateProgress() {
       console.log('updateProgress() called');
       
       // Count completed chapters for each subject
