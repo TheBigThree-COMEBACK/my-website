@@ -2078,14 +2078,6 @@ if (profileData.avatar && profileData.avatar !== '👤' && profileData.avatar.st
   showMessage('Profile saved successfully!', 'success');
 }
 
-
-function saveProfile() {
-  const name = document.getElementById('profile-name-input').value.trim();
-  if (!name) {
-    showMessage('Please enter a name!', 'error');
-    return;
-  }
-
 const modalAvatar = document.getElementById('modal-avatar-preview');
 const imgElement = modalAvatar.querySelector('img');
 const avatar = imgElement && imgElement.src.startsWith('data:') ? imgElement.src : null;
@@ -2110,6 +2102,34 @@ const avatar = imgElement && imgElement.src.startsWith('data:') ? imgElement.src
     // Use emoji for default or non-image avatars
     profileAvatar.innerHTML = '👤';
   }
+}
+
+function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  console.log('File selected:', file.name, file.size, file.type);
+  
+  // Check file size (5MB limit)
+  if (file.size > 5 * 1024 * 1024) {
+    showMessage('Image size should be less than 5MB!', 'error');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    console.log('Image loaded, data length:', e.target.result.length);
+    const modalAvatar = document.getElementById('modal-avatar-preview');
+    modalAvatar.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+    console.log('Modal avatar updated');
+  };
+  
+  reader.onerror = function(e) {
+    console.error('FileReader error:', e);
+    showMessage('Error reading image file!', 'error');
+  };
+  
+  reader.readAsDataURL(file);
 }
 
     // Message system
