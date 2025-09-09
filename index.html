@@ -1718,10 +1718,7 @@ const profileManager = {
 
 // Handle Enter Button Click - MISSING FUNCTION FIX
 function handleEnterClick() {
-  const isLoggedIn = authManager.isLoggedIn();
-  console.log('Enter clicked, isLoggedIn:', isLoggedIn);
-  
-  if (isLoggedIn) {
+  if (authManager.isLoggedIn()) {
     proceedToMainContent();
   } else {
     openAuthModal();
