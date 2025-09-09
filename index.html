@@ -987,7 +987,7 @@ body {
         font-size: 14px;
       }
 
-      .accounts-button {
+      .users-button {
         right: 10px;
         font-size: 12px;
         padding: 10px 16px;
@@ -1419,10 +1419,13 @@ body {
   <div id="message-container"></div>
 
  <script>
-// Initialize Supabase
+// Initialize Supabase - Fix the circular reference issue
 const supabaseUrl = 'https://tmlzmvukworhmrxiozdx.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtbHptdnVrd29yaG1yeGlvemR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MTkyNDYsImV4cCI6MjA3Mjk5NTI0Nn0.acPXLkCDtfTm_0Ed2XA8GOqHc8g1XFTLXPETLLlYkbo'
-const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+
+// Fix: Use window.supabase instead of creating circular reference
+const { createClient } = window.supabase
+const supabaseClient = createClient(supabaseUrl, supabaseKey)
 
 let currentUser = null;
 
@@ -1431,7 +1434,7 @@ const authManager = {
   async createAccount(username, password) {
     try {
       // Check if username already exists
-      const { data: existingProfile } = await supabase
+      const { data: existingProfile } = await supabaseClient
         .from('profiles')
         .select('username')
         .eq('username', username)
@@ -1443,7 +1446,7 @@ const authManager = {
 
       // Create auth user with email format
       const email = `${username}@temp.com`;
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
         email: email,
         password: password
       });
@@ -1451,7 +1454,7 @@ const authManager = {
       if (authError) throw authError;
 
       // Create profile
-      const { error: profileError } = await supabase
+      const { error: profileError } = await supabaseClient
         .from('profiles')
         .insert([{
           id: authData.user.id,
@@ -1471,7 +1474,7 @@ const authManager = {
   async validateLogin(username, password) {
     try {
       // Get user by username
-      const { data: profile } = await supabase
+      const { data: profile } = await supabaseClient
         .from('profiles')
         .select('id')
         .eq('username', username)
@@ -1483,7 +1486,7 @@ const authManager = {
 
       // Sign in with email format
       const email = `${username}@temp.com`;
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
       });
@@ -1493,7 +1496,7 @@ const authManager = {
       }
 
       // Get full profile data
-      const { data: fullProfile } = await supabase
+      const { data: fullProfile } = await supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', data.user.id)
@@ -1520,7 +1523,7 @@ const authManager = {
   },
 
   async logout() {
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     currentUser = null;
   },
 
@@ -1539,7 +1542,7 @@ const profileManager = {
     if (!currentUser) return;
     
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('profiles')
         .update({
           display_name: profileData.name,
@@ -1576,7 +1579,7 @@ const progressStorage = {
     
     try {
       // Delete existing progress
-      await supabase
+      await supabaseClient
         .from('user_progress')
         .delete()
         .eq('user_id', currentUser.id);
@@ -1599,7 +1602,7 @@ const progressStorage = {
       });
 
       if (progressArray.length > 0) {
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('user_progress')
           .insert(progressArray);
 
@@ -1615,7 +1618,7 @@ const progressStorage = {
     if (!currentUser) return null;
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('user_progress')
         .select('*')
         .eq('user_id', currentUser.id);
@@ -1639,7 +1642,7 @@ const progressStorage = {
     if (!currentUser) return;
     
     try {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('user_progress')
         .delete()
         .eq('user_id', currentUser.id);
@@ -2121,10 +2124,10 @@ async function initializeApp() {
   });
 
   // Check if user is already logged in (from Supabase session)
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabaseClient.auth.getUser();
   if (user) {
     // Get profile data
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseClient
       .from('profiles')
       .select('*')
       .eq('id', user.id)
