@@ -1440,24 +1440,55 @@ const authManager = {
     return null;
   },
 
-  getAllUsers: function() {
-    try {
-      const users = localStorage.getItem('registeredUsers');
-      return users ? JSON.parse(users) : [];
-    } catch (e) {
-      console.error('Error loading users:', e);
-      return [];
+ getAllUsers: async function() {
+  try {
+    // Try to load from cloud first
+    const response = await fetch(`${JSONBIN_BASE_URL}/b/${CENTRAL_USERS_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      return result.record.users || [];
     }
-  },
+    
+    // Fallback to localStorage
+    const users = localStorage.getItem('registeredUsers');
+    return users ? JSON.parse(users) : [];
+  } catch (e) {
+    console.error('Error loading users:', e);
+    const users = localStorage.getItem('registeredUsers');
+    return users ? JSON.parse(users) : [];
+  }
+},
 
-  saveAllUsers: function(users) {
-    try {
-      localStorage.setItem('registeredUsers', JSON.stringify(users));
-      console.log('Users saved successfully');
-    } catch (e) {
-      console.error('Error saving users:', e);
+saveAllUsers: async function(users) {
+  try {
+    // Save to cloud
+    const cloudData = { users: users, lastUpdated: new Date().toISOString() };
+    const response = await fetch(`${JSONBIN_BASE_URL}/b/${CENTRAL_USERS_BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_API_KEY
+      },
+      body: JSON.stringify(cloudData)
+    });
+
+    if (response.ok) {
+      console.log('Users saved to cloud successfully');
+    } else {
+      throw new Error('Failed to save to cloud');
     }
-  },
+
+    // Also save locally as backup
+    localStorage.setItem('registeredUsers', JSON.stringify(users));
+  } catch (e) {
+    console.error('Error saving users to cloud:', e);
+    // Fallback to localStorage
+    localStorage.setItem('registeredUsers', JSON.stringify(users));
+  }
+},
 
 createAccount: function(username, password) {
   return new Promise(async (resolve, reject) => {
@@ -1534,7 +1565,7 @@ createAccount: function(username, password) {
 
 validateLogin: async function(username, password) {
   try {
-    const users = this.getAllUsers();
+    const users = await this.getAllUsers();
     const localUser = users.find(u => u.userId === username && u.password === password);
     
     if (localUser) {
@@ -1595,7 +1626,7 @@ const progressStorage = {
       }
 
       // Save to cloud
-      const users = authManager.getAllUsers();
+      const users = await authManager.getAllUsers();
       const userRecord = users.find(u => u.userId === currentUser.username);
       
       if (userRecord && userRecord.binId) {
@@ -1657,7 +1688,7 @@ const progressStorage = {
       }
 
       // Try to load from cloud first
-      const users = authManager.getAllUsers();
+      const users = await authManager.getAllUsers();
       const userRecord = users.find(u => u.userId === currentUser.username);
       
       if (userRecord && userRecord.binId) {
@@ -2355,9 +2386,10 @@ function clearAllProgress() {
       }
     }
 
- // JSONBin Configuration - REPLACE WITH YOUR API KEY
+// JSONBin Configuration - REPLACE WITH YOUR API KEY
 const JSONBIN_API_KEY = '$2a$10$oAg.ibJfHjpI4sAxE/UxgOzX26JMnYTQyb7TT0U9IiijNolPy71sa';
 const JSONBIN_BASE_URL = 'https://api.jsonbin.io/v3';
+const CENTRAL_USERS_BIN_ID = '68c066d4ae596e708fe8858c'; // You need to create this bin
 
 // Initialize app
 function initializeApp() {
