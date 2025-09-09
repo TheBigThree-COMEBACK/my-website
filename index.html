@@ -1440,7 +1440,7 @@ const authManager = {
     return null;
   },
 
- getAllUsers: async function() {
+getAllUsers: async function() {
   try {
     // Try to load from cloud first
     const response = await fetch(`${JSONBIN_BASE_URL}/b/${CENTRAL_USERS_BIN_ID}/latest`, {
@@ -1492,7 +1492,7 @@ saveAllUsers: async function(users) {
 
 createAccount: function(username, password) {
   return new Promise(async (resolve, reject) => {
-    const users = this.getAllUsers();
+    const users = await this.getAllUsers(); // Add 'await' here
     const existingUser = users.find(u => u.userId === username);
     if (existingUser) {
       resolve({ success: false, error: 'Username already exists!' });
@@ -1538,7 +1538,7 @@ createAccount: function(username, password) {
       };
 
       users.push(newUser);
-      this.saveAllUsers(users);
+      await this.saveAllUsers(users);
       
       showMessage('Account created with cloud sync!', 'success');
       resolve({ success: true });
@@ -1555,7 +1555,7 @@ createAccount: function(username, password) {
         createdAt: new Date().toISOString()
       };
       users.push(newUser);
-      this.saveAllUsers(users);
+      await this.saveAllUsers(users);
       
       showMessage('Account created (local only)', 'error');
       resolve({ success: true });
