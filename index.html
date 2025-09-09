@@ -1444,15 +1444,20 @@ const authManager = {
         return { success: false, error: 'Username already exists!' };
       }
 
-      // Create auth user with email format
-      const email = `${username}@temp.com`;
-      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-        email: email,
-        password: password
-      });
+// Create auth user with email format
+const email = `${username}@temp.com`;
+const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+  email: email,
+  password: password
+});
 
-      if (authError) throw authError;
+// Log the user ID to check if it's generated correctly
+console.log("User ID from Supabase:", authData.user.id);  // This will log the user ID
 
+if (authError) {
+  console.error("Error signing up:", authError.message);
+  return;
+}
       // Create profile
       const { error: profileError } = await supabaseClient
         .from('profiles')
