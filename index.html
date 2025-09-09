@@ -2033,12 +2033,12 @@ function proceedToMainContent() {
       // Set current values
       document.getElementById('profile-name-input').value = profileData.name;
       
-      const modalAvatar = document.getElementById('modal-avatar-preview');
-      if (profileData.avatar) {
-        modalAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
-      } else {
-        modalAvatar.innerHTML = '👤';
-      }
+ const modalAvatar = document.getElementById('modal-avatar-preview');
+if (profileData.avatar && profileData.avatar !== '👤' && profileData.avatar.startsWith('data:')) {
+  modalAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
+} else {
+  modalAvatar.innerHTML = '👤';
+}
       
       modal.classList.add('active');
     }
@@ -2072,9 +2072,9 @@ function saveProfile() {
     return;
   }
 
-  const modalAvatar = document.getElementById('modal-avatar-preview');
-  const imgElement = modalAvatar.querySelector('img');
-  const avatar = imgElement ? imgElement.src : null;
+const modalAvatar = document.getElementById('modal-avatar-preview');
+const imgElement = modalAvatar.querySelector('img');
+const avatar = imgElement && imgElement.src.startsWith('data:') ? imgElement.src : null;
 
   const profileData = { name, avatar };
   profileManager.save(profileData);
@@ -2085,16 +2085,18 @@ function saveProfile() {
   closeProfileModal();
 }
 
-    function updateProfileUI(profileData) {
-      document.getElementById('profile-name').textContent = profileData.name;
-      
-      const profileAvatar = document.getElementById('profile-avatar');
-      if (profileData.avatar) {
-        profileAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
-      } else {
-        profileAvatar.innerHTML = '👤';
-      }
-    }
+ function updateProfileUI(profileData) {
+  document.getElementById('profile-name').textContent = profileData.name;
+  
+  const profileAvatar = document.getElementById('profile-avatar');
+  if (profileData.avatar && profileData.avatar !== '👤' && profileData.avatar.startsWith('data:')) {
+    // Only use img tag for actual base64 image data
+    profileAvatar.innerHTML = `<img src="${profileData.avatar}" alt="Avatar">`;
+  } else {
+    // Use emoji for default or non-image avatars
+    profileAvatar.innerHTML = '👤';
+  }
+}
 
     // Message system
     function showMessage(text, type = 'success') {
