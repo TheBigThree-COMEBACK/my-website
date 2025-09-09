@@ -2058,17 +2058,7 @@ if (profileData.avatar && profileData.avatar !== '👤' && profileData.avatar.st
   const modalAvatar = document.getElementById('modal-avatar-preview');
   const imgElement = modalAvatar.querySelector('img');
   
-  console.log('Modal avatar element:', modalAvatar.innerHTML);
-  console.log('Image element found:', !!imgElement);
-  
-  if (imgElement) {
-    console.log('Image src starts with data:', imgElement.src.startsWith('data:'));
-    console.log('Image src length:', imgElement.src.length);
-  }
-  
   const avatar = imgElement && imgElement.src.startsWith('data:') ? imgElement.src : null;
-
-  console.log('Final avatar value:', avatar ? 'Has image data' : 'No image data');
 
   const profileData = { name, avatar };
   profileManager.save(profileData);
@@ -2076,19 +2066,6 @@ if (profileData.avatar && profileData.avatar !== '👤' && profileData.avatar.st
   updateProfileUI(profileData);
   closeProfileModal();
   showMessage('Profile saved successfully!', 'success');
-}
-
-const modalAvatar = document.getElementById('modal-avatar-preview');
-const imgElement = modalAvatar.querySelector('img');
-const avatar = imgElement && imgElement.src.startsWith('data:') ? imgElement.src : null;
-
-  const profileData = { name, avatar };
-  profileManager.save(profileData);
-  
-  // Update UI
-  updateProfileUI(profileData);
-  
-  closeProfileModal();
 }
 
  function updateProfileUI(profileData) {
