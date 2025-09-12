@@ -1569,6 +1569,7 @@ validateLogin: async function(username, password) {
     const localUser = users.find(u => u.userId === username && u.password === password);
     
     if (localUser) {
+      let cloudData = null;
       // Try to fetch latest data from cloud if binId exists
       if (localUser.binId) {
         try {
@@ -1577,7 +1578,12 @@ validateLogin: async function(username, password) {
           });
           if (response.ok) {
             const result = await response.json();
+            cloudData = result.record;
             console.log('Loaded cloud data for user');
+            
+            // Update local user data with cloud data
+            localUser.name = cloudData.name || localUser.name;
+            localUser.avatar = cloudData.avatar || localUser.avatar;
           }
         } catch (e) {
           console.log('Cloud sync failed, using local data');
@@ -1599,6 +1605,7 @@ validateLogin: async function(username, password) {
     return { success: false, error: 'Login error. Please try again!' };
   }
 },
+
   logout: function() {
     try {
       localStorage.removeItem('userAuth');
@@ -1865,17 +1872,17 @@ function handleLogin() {
   authManager.validateLogin(username, password)
     .then(result => {
       if (result.success) {
- authManager.save({ 
-  username: result.userData.userId, 
-  name: result.userData.name,
-  avatar: result.userData.avatar === '👤' ? null : result.userData.avatar,
-  loggedInAt: new Date().toISOString() 
-});
+        authManager.save({ 
+          username: result.userData.userId, 
+          name: result.userData.name,
+          avatar: result.userData.avatar,
+          loggedInAt: new Date().toISOString() 
+        });
 
-updateProfileUI({
-  name: result.userData.name,
-  avatar: result.userData.avatar === '👤' ? null : result.userData.avatar
-});
+        updateProfileUI({
+          name: result.userData.name,
+          avatar: result.userData.avatar
+        });
         
         closeAuthModal();
         showMessage('Login successful!', 'success');
@@ -2046,7 +2053,7 @@ if (profileData.avatar && profileData.avatar !== '👤' && profileData.avatar.st
       document.getElementById('profile-modal-overlay').classList.remove('active');
     }
 
-function saveProfile() {
+async function saveProfile() {
   console.log('saveProfile() called');
   
   const name = document.getElementById('profile-name-input').value.trim();
@@ -2060,7 +2067,69 @@ function saveProfile() {
   const avatar = imgElement && imgElement.src.startsWith('data:') ? imgElement.src : null;
 
   const profileData = { name, avatar };
+  
+  // Save profile locally
   profileManager.save(profileData);
+  
+  // Also save to cloud if user is logged in
+  const currentUser = authManager.load();
+  if (currentUser && currentUser.username) {
+    try {
+      const users = await authManager.getAllUsers();
+      const userRecord = users.find(u => u.userId === currentUser.username);
+      
+      if (userRecord && userRecord.binId) {
+        // Get current cloud data
+        const response = await fetch(`${JSONBIN_BASE_URL}/b/${userRecord.binId}/latest`, {
+          headers: { 'X-Master-Key': JSONBIN_API_KEY }
+        });
+        
+        let cloudData = {};
+        if (response.ok) {
+          const result = await response.json();
+          cloudData = result.record;
+        }
+
+        // Update cloud data with new profile
+        cloudData.name = name;
+        cloudData.avatar = avatar;
+        cloudData.profile = profileData;
+        cloudData.lastUpdated = new Date().toISOString();
+
+        // Save back to cloud
+        const updateResponse = await fetch(`${JSONBIN_BASE_URL}/b/${userRecord.binId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Master-Key': JSONBIN_API_KEY
+          },
+          body: JSON.stringify(cloudData)
+        });
+
+        if (updateResponse.ok) {
+          console.log('Profile saved to cloud successfully');
+          
+          // Update the local users list too
+          userRecord.name = name;
+          userRecord.avatar = avatar;
+          await authManager.saveAllUsers(users);
+          
+          // Update current user session
+          authManager.save({
+            username: currentUser.username,
+            name: name,
+            avatar: avatar,
+            loggedInAt: currentUser.loggedInAt
+          });
+          
+        } else {
+          console.error('Failed to save profile to cloud');
+        }
+      }
+    } catch (e) {
+      console.error('Error saving profile to cloud:', e);
+    }
+  }
   
   updateProfileUI(profileData);
   closeProfileModal();
