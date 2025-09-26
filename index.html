@@ -1049,6 +1049,7 @@ body {
 
     <!-- Navigation -->
     <div class="nav-container">
+     <button class="nav-btn" onclick="showSubject('daily')">📅 Daily Progress</button>
       <button class="nav-btn active" onclick="showSubject('mathematics')">🔢 Mathematics</button>
       <button class="nav-btn" onclick="showSubject('science')">🔬 Science</button>
       <button class="nav-btn" onclick="showSubject('english')">📖 English</button>
@@ -1058,220 +1059,495 @@ body {
 
     <!-- Content -->
     <div class="content">
-      <!-- Mathematics Section -->
+<!-- Daily Progress Section -->
+<div id="daily" class="subject-section">
+  <h2 class="subject-title">📅 Daily Progress</h2>
+  <div class="chapters-grid">
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 1</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 2</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 3</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 4</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 5</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 6</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 7</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 8</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 9</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 10</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 11</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 12</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 13</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 14</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 15</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 16</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 17</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 18</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 19</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 20</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 21</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 22</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 23</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 24</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 25</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 26</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 27</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 28</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 29</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 30</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 31</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 32</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 33</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 34</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 35</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 36</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 37</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 38</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 39</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 40</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 41</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 42</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 43</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 44</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 45</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 46</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 47</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 48</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 49</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 50</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 51</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 52</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 53</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 54</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 55</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 56</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 57</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 58</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 59</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 60</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 61</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 62</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 63</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 64</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 65</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 66</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 67</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 68</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 69</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 70</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 71</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 72</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 73</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 74</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 75</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 76</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 77</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 78</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 79</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 80</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 81</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 82</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 83</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 84</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 85</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 86</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 87</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 88</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 89</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 90</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 91</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 92</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 93</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 94</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 95</label></div>
+    <div class="chapter-item"><label><input type="checkbox" data-subject="daily"> 📅 Day 96</label></div>
+  </div>
+</div>
+  <!-- Mathematics Section -->
       <div id="mathematics" class="subject-section active">
-        <h2 class="subject-title">Mathematics</h2>
+        <h2 class="subject-title">📘 Mathematics</h2>
         <div class="chapters-grid">
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Real Numbers</label>
+            <label><input type="checkbox" data-subject="mathematics"> 🔢 Real Numbers</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Polynomials</label>
+            <label><input type="checkbox" data-subject="mathematics"> 📈 Polynomials</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Linear Equations in Two Variables</label>
+            <label><input type="checkbox" data-subject="mathematics"> ⚖️ Pair of Linear Equations in Two Variables</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Triangles</label>
+            <label><input type="checkbox" data-subject="mathematics"> 🔴 Quadratic Equations</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Quadratic Equations</label>
+            <label><input type="checkbox" data-subject="mathematics"> 📊 Arithmetic Progressions</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Coordinate Geometry</label>
+            <label><input type="checkbox" data-subject="mathematics"> 📐 Triangles</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Arithmetic Progressions (A.P)</label>
+            <label><input type="checkbox" data-subject="mathematics"> 📍 Coordinate Geometry</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Trigonometry</label>
+            <label><input type="checkbox" data-subject="mathematics"> 📏 Introduction to Trigonometry</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Some Applications of Trigonometry</label>
+            <label><input type="checkbox" data-subject="mathematics"> 🏗️ Some Applications of Trigonometry</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> Circles</label>
+            <label><input type="checkbox" data-subject="mathematics"> ⭕ Circles</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="mathematics"> 📝 Constructions</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="mathematics"> 🔵 Areas Related to Circles</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="mathematics"> 📦 Surface Areas and Volumes</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="mathematics"> 📊 Statistics</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="mathematics"> 🎲 Probability</label>
           </div>
         </div>
       </div>
 
-      <!-- Science Section -->
+      <!-- Science Section (Physics + Chemistry + Biology) -->
       <div id="science" class="subject-section">
-        <h2 class="subject-title">Science</h2>
+        <h2 class="subject-title">📗 Science</h2>
         <div class="chapters-grid">
+          <!-- Physics -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="science"> ⚡ Light – Reflection and Refraction</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="science"> 👁️ Human Eye and the Colourful World</label>
+          </div>
           <div class="chapter-item">
             <label><input type="checkbox" data-subject="science"> ⚡ Electricity</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="science"> ⚡ Magnetic Effect of Electric Current</label>
+            <label><input type="checkbox" data-subject="science"> 🧲 Magnetic Effects of Electric Current</label>
+          </div>
+          <!-- Chemistry -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="science"> ⚗️ Chemical Reactions and Equations</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="science"> ⚡ Light</label>
+            <label><input type="checkbox" data-subject="science"> 🧪 Acids, Bases and Salts</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="science"> 🧪 Chemical Reactions and Equations</label>
+            <label><input type="checkbox" data-subject="science"> 🔬 Metals and Non-Metals</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="science"> 🧪 Carbon and its Compounds</label>
+            <label><input type="checkbox" data-subject="science"> 🧬 Carbon and Its Compounds</label>
+          </div>
+          <!-- Biology -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="science"> 💓 Life Processes</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="science"> 🧬 Life Processes</label>
+            <label><input type="checkbox" data-subject="science"> 🧠 Control and Coordination</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="science"> 🧬 Control and Coordination</label>
+            <label><input type="checkbox" data-subject="science"> 🌱 How do Organisms Reproduce?</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="science"> 🧬 Heredity and Evolution</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="science"> 🌍 Our Environment</label>
           </div>
         </div>
       </div>
 
-      <!-- English Section -->
+      <!-- English Section (First Flight + Footprints + Grammar) -->
       <div id="english" class="subject-section">
-        <h2 class="subject-title">English</h2>
+        <h2 class="subject-title">📙 English</h2>
         <div class="chapters-grid">
+          <!-- First Flight -->
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> A Letter to God</label>
+            <label><input type="checkbox" data-subject="english"> 📬 A Letter to God</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Nelson Mandela: Long Walk to Freedom</label>
+            <label><input type="checkbox" data-subject="english"> 🚶‍♂️ Nelson Mandela – Long Walk to Freedom</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Footprints Without Feet</label>
+            <label><input type="checkbox" data-subject="english"> ✈️ Two Stories about Flying</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Two Stories About Flying (First Flight)</label>
+            <label><input type="checkbox" data-subject="english"> 📓 From the Diary of Anne Frank</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> The Black Aeroplane</label>
+            <label><input type="checkbox" data-subject="english"> 🇮🇳 Glimpses of India</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> From the Diary of Anne Frank</label>
+            <label><input type="checkbox" data-subject="english"> 🦦 Mijbil the Otter</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> A Baker from Goa</label>
+            <label><input type="checkbox" data-subject="english"> 🚌 Madam Rides the Bus</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Coorg</label>
+            <label><input type="checkbox" data-subject="english"> 🕉️ The Sermon at Benares</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Tea from Assam</label>
+            <label><input type="checkbox" data-subject="english"> 💍 The Proposal</label>
+          </div>
+          <!-- Poems -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> ❄️ Dust of Snow</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Dust of Snow</label>
+            <label><input type="checkbox" data-subject="english"> 🔥 Fire and Ice</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Fire and Ice</label>
+            <label><input type="checkbox" data-subject="english"> 🐅 A Tiger in the Zoo</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> A Tiger in the Zoo</label>
+            <label><input type="checkbox" data-subject="english"> 🦁 How to Tell Wild Animals</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> How to Tell Wild Animals Apart</label>
+            <label><input type="checkbox" data-subject="english"> ⚽ The Ball Poem</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> The Ball Poem</label>
+            <label><input type="checkbox" data-subject="english"> 👧 Amanda!</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> Amanda</label>
+            <label><input type="checkbox" data-subject="english"> 🐾 Animals</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> The Triumph of Surgery</label>
+            <label><input type="checkbox" data-subject="english"> 🌳 The Trees</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> The Thief's Story</label>
+            <label><input type="checkbox" data-subject="english"> 🌫️ Fog</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> The Midnight Visitor</label>
+            <label><input type="checkbox" data-subject="english"> 🐉 The Tale of Custard the Dragon</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> A Question of Trust</label>
+            <label><input type="checkbox" data-subject="english"> 👩 For Anne Gregory</label>
+          </div>
+          <!-- Footprints Without Feet -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🏥 A Triumph of Surgery</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🔓 The Thief's Story</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🌙 The Midnight Visitor</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🤝 A Question of Trust</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 👣 Footprints Without Feet</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🔬 The Making of a Scientist</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 💎 The Necklace</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🚗 The Hack Driver</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 👧 Bholi</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 📚 The Book that Saved the Earth</label>
+          </div>
+          <!-- English Grammar -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> ⏰ Tenses</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🔄 Modals</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🤝 Subject–Verb Concord</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 💬 Reported Speech</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🔗 Clauses</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 📌 Determiners</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="english"> 🗺️ Prepositions</label>
           </div>
         </div>
       </div>
 
-      <!-- Hindi Section -->
+      <!-- Hindi Section (Sparsh + Sanchayan + Grammar) -->
       <div id="hindi" class="subject-section">
-        <h2 class="subject-title">Hindi</h2>
+        <h2 class="subject-title">📒 Hindi</h2>
         <div class="chapters-grid">
+          <!-- Sparsh -->
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Sakhi</label>
+            <label><input type="checkbox" data-subject="hindi"> 🙏 Saakhi</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Bare Bhai Sahab</label>
+            <label><input type="checkbox" data-subject="hindi"> 📝 Pad</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Hariar Kaka</label>
+            <label><input type="checkbox" data-subject="hindi"> 👨 Manushyata</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Pad</label>
+            <label><input type="checkbox" data-subject="hindi"> ⛰️ Parvat Pradesh Mein Paavat</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Diary ka Ek Paana</label>
+            <label><input type="checkbox" data-subject="hindi"> 🎯 Top</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Tatara aur Wamir Katha</label>
+            <label><input type="checkbox" data-subject="hindi"> 🇮🇳 Kar Chale Hum Fida</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Manushyta</label>
+            <label><input type="checkbox" data-subject="hindi"> 🧘 Aatmatran</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Sapno ke Se Din</label>
+            <label><input type="checkbox" data-subject="hindi"> 👨‍👦 Bade Bhai Sahab</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Tisri Kaasam</label>
+            <label><input type="checkbox" data-subject="hindi"> 📔 Diary Ka Ek Panna</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Parwat Pradesh Mai Pawak</label>
+            <label><input type="checkbox" data-subject="hindi"> 📚 Tatara-Vamiro Katha</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> Top</label>
+            <label><input type="checkbox" data-subject="hindi"> 🎬 Teesri Kasam Ke Shilpkar Shailendra</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 💔 Ab Kahan Dusro Ke Dukh Se Dukhi Hone Wale</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 🍂 Patjhad Mein Tooti Pattiyan</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> ✍️ Karthus</label>
+          </div>
+          <!-- Sanchayan -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 👨‍🌾 Harihar Kaka</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 💭 Sapno ke-Se Din</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 👦 Topi Shukla</label>
+          </div>
+          <!-- Hindi Grammar -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 📖 समास (Samas)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 🔤 संधि (Sandhi)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 🎨 अलंकार (Alankaar)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 🔄 वाक्य रूपांतरण (Sentence Transformation)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 🗨️ मुहावरे और लोकोक्तियाँ (Idioms & Proverbs)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> ✉️ पत्र लेखन (Letter Writing)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 📄 अनुच्छेद लेखन (Paragraph Writing)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 💬 संवाद लेखन (Dialogue Writing)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 📺 विज्ञापन लेखन (Advertisement Writing)</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="hindi"> 📖 कहानी लेखन (Story Writing)</label>
           </div>
         </div>
       </div>
 
-      <!-- Social Science Section -->
+      <!-- Social Science Section (History + Geography + Civics + Economics) -->
       <div id="sst" class="subject-section">
-        <h2 class="subject-title">Social Science</h2>
+        <h2 class="subject-title">📕 Social Science</h2>
         <div class="chapters-grid">
+          <!-- History -->
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 📚 The Rise of Nationalism in Europe</label>
+            <label><input type="checkbox" data-subject="sst"> 🏛️ The Rise of Nationalism in Europe</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 📚 The Making of a Global World</label>
+            <label><input type="checkbox" data-subject="sst"> 🇮🇳 Nationalism in India</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 📚 Nationalism in India</label>
+            <label><input type="checkbox" data-subject="sst"> 🌐 The Making of a Global World</label>
           </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🏭 The Age of Industrialisation</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 📰 Print Culture and the Modern World</label>
+          </div>
+          <!-- Geography -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🌍 Resources and Development</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🌲 Forest and Wildlife</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 💧 Water Resources</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🌾 Agriculture</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> ⚡ Minerals and Energy Resources</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🏭 Manufacturing Industries</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🚛 Life Lines of National Economy</label>
+          </div>
+          <!-- Political Science -->
           <div class="chapter-item">
             <label><input type="checkbox" data-subject="sst"> ⚖️ Power Sharing</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> ⚖️ Federalism</label>
+            <label><input type="checkbox" data-subject="sst"> 🏛️ Federalism</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> ⚖️ Gender, Caste and Religion</label>
+            <label><input type="checkbox" data-subject="sst"> 👥 Gender, Religion and Caste</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 🌍 Resource and Development</label>
+            <label><input type="checkbox" data-subject="sst"> 🗳️ Political Parties</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 🌍 Forest and Wildlife Resources</label>
+            <label><input type="checkbox" data-subject="sst"> ✅ Outcomes of Democracy</label>
+          </div>
+          <!-- Economics -->
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 📈 Development</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 🌍 Water Resources</label>
-          </div>
-          <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 🌍 Agriculture</label>
-          </div>
-          <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 🌍 Minerals and Energy Resources</label>
-          </div>
-          <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 💰 Development</label>
-          </div>
-          <div class="chapter-item">
-            <label><input type="checkbox" data-subject="sst"> 💰 Sectors of the Indian Economy</label>
+            <label><input type="checkbox" data-subject="sst"> 💼 Sectors of the Indian Economy</label>
           </div>
           <div class="chapter-item">
             <label><input type="checkbox" data-subject="sst"> 💰 Money and Credit</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🌍 Globalisation and the Indian Economy</label>
+          </div>
+          <div class="chapter-item">
+            <label><input type="checkbox" data-subject="sst"> 🛡️ Consumer Rights</label>
           </div>
         </div>
       </div>
@@ -1284,41 +1560,48 @@ body {
         </div>
         <div id="overall-progress-text" class="progress-text">0% Completed</div>
         
-        <div class="subject-progress">
+    <div class="subject-progress">
           <div class="subject-progress-item">
             <h4>Mathematics</h4>
             <div class="mini-progress-bar">
               <div id="math-progress" class="mini-progress-fill"></div>
             </div>
-            <span id="math-text">0/10</span>
+            <span id="math-text">0/15</span>
           </div>
           <div class="subject-progress-item">
             <h4>Science</h4>
             <div class="mini-progress-bar">
               <div id="science-progress" class="mini-progress-fill"></div>
             </div>
-            <span id="science-text">0/7</span>
+            <span id="science-text">0/13</span>
           </div>
           <div class="subject-progress-item">
             <h4>English</h4>
             <div class="mini-progress-bar">
               <div id="english-progress" class="mini-progress-fill"></div>
             </div>
-            <span id="english-text">0/19</span>
+            <span id="english-text">0/37</span>
           </div>
           <div class="subject-progress-item">
             <h4>Hindi</h4>
             <div class="mini-progress-bar">
               <div id="hindi-progress" class="mini-progress-fill"></div>
             </div>
-            <span id="hindi-text">0/11</span>
+            <span id="hindi-text">0/27</span>
           </div>
           <div class="subject-progress-item">
             <h4>Social Science</h4>
             <div class="mini-progress-bar">
               <div id="sst-progress" class="mini-progress-fill"></div>
             </div>
-            <span id="sst-text">0/14</span>
+            <span id="sst-text">0/20</span>
+          </div>
+          <div class="subject-progress-item">
+            <h4>Daily Progress</h4>
+            <div class="mini-progress-bar">
+              <div id="daily-progress" class="mini-progress-fill"></div>
+            </div>
+            <span id="daily-text">0/96</span>
           </div>
         </div>
         
@@ -2219,13 +2502,14 @@ function handleAvatarUpload(event) {
       console.log('updateProgress() called');
       
       // Count completed chapters for each subject
-      const subjectCounts = {
-        mathematics: { total: 10, completed: 0 },
-        science: { total: 7, completed: 0 },
-        english: { total: 19, completed: 0 },
-        hindi: { total: 11, completed: 0 },
-        sst: { total: 14, completed: 0 }
-      };
+const subjectCounts = {
+  mathematics: { total: 15, completed: 0 },
+  science: { total: 13, completed: 0 },
+  english: { total: 37, completed: 0 },
+  hindi: { total: 27, completed: 0 },
+  sst: { total: 20, completed: 0 },
+  daily: { total: 96, completed: 0 }
+};
 
       // Count checked boxes for each subject
       document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -2257,13 +2541,14 @@ function handleAvatarUpload(event) {
       Object.keys(subjectCounts).forEach(subject => {
         const subjectProgress = subjectCounts[subject].total > 0 ? (subjectCounts[subject].completed / subjectCounts[subject].total) * 100 : 0;
         
-        const subjectIdMap = {
-          'mathematics': 'math',
-          'science': 'science', 
-          'english': 'english',
-          'hindi': 'hindi',
-          'sst': 'sst'
-        };
+ const subjectIdMap = {
+  'mathematics': 'math',
+  'science': 'science', 
+  'english': 'english',
+  'hindi': 'hindi',
+  'sst': 'sst',
+  'daily': 'daily'
+};
         
         const htmlId = subjectIdMap[subject] || subject;
         const progressElement = document.getElementById(htmlId + '-progress');
