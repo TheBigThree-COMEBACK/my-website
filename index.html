@@ -712,14 +712,22 @@ body {
     }
 
     /* Subject Sections */
-    .subject-section {
-      display: none;
-      animation: fadeIn 0.5s ease;
-    }
+ .subject-section {
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
 
-    .subject-section.active {
-      display: block;
-    }
+.subject-section.active {
+  display: block;
+}
+
+.chapters-grid {
+  display: none;
+}
+
+.subject-section.show-chapters .chapters-grid {
+  display: grid;
+}
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
@@ -1196,9 +1204,6 @@ body {
             <label><input type="checkbox" data-subject="mathematics"> ⭕ Circles</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="mathematics"> 📝 Constructions</label>
-          </div>
-          <div class="chapter-item">
             <label><input type="checkbox" data-subject="mathematics"> 🔵 Areas Related to Circles</label>
           </div>
           <div class="chapter-item">
@@ -1373,13 +1378,7 @@ body {
             <label><input type="checkbox" data-subject="english"> 💬 Reported Speech</label>
           </div>
           <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> 🔗 Clauses</label>
-          </div>
-          <div class="chapter-item">
             <label><input type="checkbox" data-subject="english"> 📌 Determiners</label>
-          </div>
-          <div class="chapter-item">
-            <label><input type="checkbox" data-subject="english"> 🗺️ Prepositions</label>
           </div>
         </div>
       </div>
@@ -1447,9 +1446,6 @@ body {
           </div>
           <div class="chapter-item">
             <label><input type="checkbox" data-subject="hindi"> 🔤 संधि (Sandhi)</label>
-          </div>
-          <div class="chapter-item">
-            <label><input type="checkbox" data-subject="hindi"> 🎨 अलंकार (Alankaar)</label>
           </div>
           <div class="chapter-item">
             <label><input type="checkbox" data-subject="hindi"> 🔄 वाक्य रूपांतरण (Sentence Transformation)</label>
@@ -2480,34 +2476,37 @@ function handleAvatarUpload(event) {
     }
 
     // Subject navigation
-    function showSubject(subject) {
-      // Hide all sections
-      document.querySelectorAll('.subject-section').forEach(section => {
-        section.classList.remove('active');
-      });
-      
-      // Remove active from all buttons
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      // Show selected section
-      document.getElementById(subject).classList.add('active');
-      
-      // Add active to clicked button
-      event.target.classList.add('active');
-    }
+function showSubject(subject) {
+  // Hide all sections
+  document.querySelectorAll('.subject-section').forEach(section => {
+    section.classList.remove('active');
+    section.classList.remove('show-chapters');
+  });
+  
+  // Remove active from all buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show selected section with chapters
+  const selectedSection = document.getElementById(subject);
+  selectedSection.classList.add('active');
+  selectedSection.classList.add('show-chapters');
+  
+  // Add active to clicked button
+  event.target.classList.add('active');
+}
 
     async function updateProgress() {
       console.log('updateProgress() called');
       
       // Count completed chapters for each subject
 const subjectCounts = {
-  mathematics: { total: 15, completed: 0 },
+  mathematics: { total: 14, completed: 0 },
   science: { total: 13, completed: 0 },
-  english: { total: 37, completed: 0 },
-  hindi: { total: 27, completed: 0 },
-  sst: { total: 20, completed: 0 },
+  english: { total: 35, completed: 0 },
+  hindi: { total: 26, completed: 0 },
+  sst: { total: 22, completed: 0 },
   daily: { total: 96, completed: 0 }
 };
 
@@ -2523,10 +2522,13 @@ const subjectCounts = {
       let totalChapters = 0;
       let completedChapters = 0;
       
-      Object.values(subjectCounts).forEach(subject => {
-        totalChapters += subject.total;
-        completedChapters += subject.completed;
-      });
+// Exclude daily from overall progress calculation
+Object.keys(subjectCounts).forEach(key => {
+  if (key !== 'daily') {
+    totalChapters += subjectCounts[key].total;
+    completedChapters += subjectCounts[key].completed;
+  }
+});
 
       const overallProgress = totalChapters > 0 ? (completedChapters / totalChapters) * 100 : 0;
 
